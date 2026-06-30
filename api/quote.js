@@ -8,7 +8,7 @@ import { google } from "googleapis";
 
 const MONEY_TAB = "PB 자금 계획";
 const QUOTE_CELL = `'${MONEY_TAB}'!A1000`;
-const DEFAULT_QUOTE = "오늘 하루도 단단하게 ✊";
+const DEFAULT_QUOTE = "야호~";
 const ADMIN_PW = process.env.ADMIN_PW || "rizz2026";
 
 function getAuth(readonly) {
