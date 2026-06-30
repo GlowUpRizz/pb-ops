@@ -32,7 +32,18 @@ export default async function handler(req, res) {
 
     if (req.method === "POST") {
       const { pw, quote } = req.body || {};
-      if (pw !== ADMIN_PW) return res.status(401).json({ error: "비밀번호 오류" });
+      if (pw !== ADMIN_PW) {
+        // 임시 디버그: 평문 노출 없이 서버가 인식한 ADMIN_PW의 길이와 양끝 글자만 보여줌
+        const mask = (s) => (s ? `${s[0]}${"*".repeat(Math.max(0, s.length - 2))}${s[s.length - 1]} (len:${s.length})` : "(empty)");
+        return res.status(401).json({
+          error: "비밀번호 오류",
+          debug: {
+            envAdminPwMasked: mask(ADMIN_PW),
+            receivedPwMasked: mask(pw),
+            envSource: process.env.ADMIN_PW ? "env" : "default-fallback",
+          },
+        });
+      }
       const text = (quote || "").toString().trim().slice(0, 80); // 너무 길어지는 것 방지
       if (!text) return res.status(400).json({ error: "문구를 입력해주세요" });
       const sheets = google.sheets({ version: "v4", auth: getAuth(false) });
