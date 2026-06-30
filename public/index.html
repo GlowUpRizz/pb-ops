@@ -236,7 +236,6 @@
             <input id="pw" type="password" placeholder="비밀번호" autocomplete="off" />
             <button class="lb" id="login">입장</button>
             <div class="err" id="err"></div>
-            <div class="hint">데모: rizz2026</div>
           </div>
         </div>
       </div>
@@ -477,12 +476,23 @@ function ganttBlock(list){
 function cardsHTML(list){return '<div class="cards">'+list.map(c=>'<div class="card"><div class="brand">'+c.brand+'</div><div class="chan">'+c.channel+'</div><div class="row"><span class="date">'+c.date+'</span><div class="figs"><div class="fig"><b>'+won(c.deal)+'</b><span>거래액</span></div><div class="fig"><b>'+won(c.actual)+'</b><span>실매출</span></div></div></div></div>').join('')+'</div>';}
 function isClosed(c){return cdateEnd(c.date)<TODAY_MID;}
 
-/* 채널/크리에이터명 기준 해시 → 12색 팔레트에서 일관된 색 배정 */
-const CH_COLORS=['#E24B4A','#378ADD','#639922','#BA7517','#A575F0','#D4537E','#1D9E75','#D85A30','#5DCAA5','#9a9a95','#85B7EB','#EF9F27'];
+/* 채널/크리에이터명 → 색상 배정. 매 렌더마다 실제 등장하는 채널 목록을 모아
+   순서대로 큰 팔레트에서 배정하므로(해시 충돌 없음) 비슷한 색이 겹치지 않는다. */
+const CH_COLORS=['#E0524F','#4A90D9','#7BAE3E','#E0A23A','#9B6FE0','#D9477B','#3FB89A','#D9824A','#5AA8E0','#C45FD0','#4EBF8A','#E0507B','#7B7FE0','#3FA0C9','#E08A3A','#6FA83E','#D94AA0','#3FC2C2','#A8773E','#8A8FE0'];
+let _chanColorMap=null;
+function rebuildChanColorMap(){
+  const names=[...new Set(commerce.map(c=>(c.channel||'').trim()).filter(Boolean))];
+  _chanColorMap=new Map();
+  names.forEach((n,i)=>_chanColorMap.set(n,CH_COLORS[i%CH_COLORS.length]));
+}
 function chanColor(name){
-  const s=(name||'').trim()||'미지정';
-  let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
-  return CH_COLORS[h%CH_COLORS.length];
+  if(!_chanColorMap)rebuildChanColorMap();
+  const s=(name||'').trim();
+  if(!s)return '#7c7c7c';
+  if(!_chanColorMap.has(s)){ // 목록 갱신 후 새 채널이 추가된 경우 대비
+    rebuildChanColorMap();
+  }
+  return _chanColorMap.get(s)||'#7c7c7c';
 }
 
 /* 목록 뷰: 날짜순 한 줄 리스트 */
@@ -697,7 +707,7 @@ function meta(live){document.getElementById('srcmode').textContent=live?'LIVE':'
 async function load(){
   let live=false;
   try{const [c,p]=await Promise.all([fetch('/api/monday-pb').then(r=>r.ok?r.json():null),fetch('/api/sheet-pb').then(r=>r.ok?r.json():null)]);
-    if(Array.isArray(c)&&c.length){commerce=c;live=true;}if(Array.isArray(p)&&p.length){production=p;live=true;}}catch(e){}
+    if(Array.isArray(c)&&c.length){commerce=c;live=true;_chanColorMap=null;}if(Array.isArray(p)&&p.length){production=p;live=true;}}catch(e){}
   meta(live);render();
 }
 load();setInterval(load,15*60*1000);
