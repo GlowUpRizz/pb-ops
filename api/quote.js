@@ -7,7 +7,7 @@
 import { google } from "googleapis";
 
 const MONEY_TAB = "PB 자금 계획";
-const QUOTE_CELL = `'${MONEY_TAB}'!Z1`;
+const QUOTE_CELL = `'${MONEY_TAB}'!A1000`;
 const DEFAULT_QUOTE = "오늘 하루도 단단하게 ✊";
 const ADMIN_PW = process.env.ADMIN_PW || "rizz2026";
 
@@ -35,12 +35,14 @@ export default async function handler(req, res) {
       if (pw !== ADMIN_PW) {
         // 임시 디버그: 평문 노출 없이 서버가 인식한 ADMIN_PW의 길이와 양끝 글자만 보여줌
         const mask = (s) => (s ? `${s[0]}${"*".repeat(Math.max(0, s.length - 2))}${s[s.length - 1]} (len:${s.length})` : "(empty)");
+        const sa = process.env.GOOGLE_SA_KEY || "";
         return res.status(401).json({
           error: "비밀번호 오류",
           debug: {
             envAdminPwMasked: mask(ADMIN_PW),
             receivedPwMasked: mask(pw),
             envSource: process.env.ADMIN_PW ? "env" : "default-fallback",
+            looksLikeKeyFragment: sa.includes(ADMIN_PW) ? "GOOGLE_SA_KEY 안에 이 값이 포함되어 있음(잘못 복사됐을 가능성)" : "아니오",
           },
         });
       }
