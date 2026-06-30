@@ -12,6 +12,8 @@
     --ink:#f5f5f5; --mut:#8a8a8a; --mut2:#5c5c5c; --red:#F40606; --pur:#A575F0; --blu:#4DA6FF;
     --ph-plan:#3a3a3a; --ph-sample:#E8C547; --ph-deposit:#F40606; --ph-prod:#5BB97A; --ph-stock:#E08A2B; --ph-etc:#7C7C7C;
     --mono:'Space Mono',monospace;
+    --ch-0:#E24B4A; --ch-1:#378ADD; --ch-2:#639922; --ch-3:#BA7517; --ch-4:#A575F0; --ch-5:#D4537E;
+    --ch-6:#1D9E75; --ch-7:#D85A30; --ch-8:#5DCAA5; --ch-9:#888780; --ch-10:#85B7EB; --ch-11:#EF9F27;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--ink);font-family:'Pretendard',sans-serif;-webkit-font-smoothing:antialiased;padding:0 0 80px}
@@ -54,24 +56,6 @@
   .adminpop .err{color:var(--red);font-family:var(--mono);font-size:11px;height:13px;margin-top:6px}
   .adminpop .hint{font-family:var(--mono);font-size:10px;color:var(--mut2);margin-top:6px}
 
-  /* 가까운 일정 네모 박스 */
-  .tbx{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px 4px;width:460px;max-width:100%;flex:none;max-height:96px;display:flex;flex-direction:column}
-  .tbx h3{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase;margin-bottom:2px;display:flex;justify-content:space-between;align-items:center;flex:none}
-  .tbx h3 b{color:var(--red);font-size:13px}
-  .tblist{overflow-y:auto;flex:1;padding-bottom:10px}
-  .tblist::-webkit-scrollbar{width:5px}
-  .tblist::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
-  .tbi{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line2);cursor:pointer}
-  .tbi:first-of-type{border-top:none}
-  .tbi:hover .tbn{color:#fff}
-  .tbi .dot2{width:8px;height:8px;border-radius:2px;flex:none}
-  .tbi .tbtx{flex:1;min-width:0}
-  .tbi .tbn{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tbi .tbt{font-size:11px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tbi .tbd{font-family:var(--mono);font-size:11px;font-weight:700;white-space:nowrap}
-  .tbi .tbd.over{color:var(--red)} .tbi .tbd.soon{color:var(--ph-stock)} .tbi .tbd.ok{color:var(--mut)}
-  .tbx .empty2{font-family:var(--mono);font-size:12px;color:var(--mut2);padding:12px 0;text-align:center}
-
   .nav{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);background:var(--bg);flex-wrap:wrap}
   .navtabs,.navutil{display:flex;gap:6px;overflow-x:auto}
   .tab{flex:none;background:transparent;border:1px solid var(--line);color:var(--mut);font-family:var(--mono);font-size:12px;padding:8px 14px;border-radius:99px;cursor:pointer;white-space:nowrap}
@@ -92,8 +76,50 @@
   .card .chan{font-weight:700;font-size:13px;color:var(--ink)}
   .card .row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px}
   .card .date{font-family:var(--mono);font-size:13px;color:var(--ph-stock)}
-  .card .rev{font-family:var(--mono);font-size:12px;color:var(--mut)}
-  .card .rev span{font-size:11px;color:var(--mut2)}
+  .card .figs{display:flex;gap:14px;font-family:var(--mono)}
+  .card .fig{text-align:right}
+  .card .fig b{display:block;font-size:13px;color:var(--ink);font-weight:700}
+  .card .fig span{font-size:10px;color:var(--mut2)}
+
+  /* 커머스 일정: 목록/캘린더 뷰 토글 */
+  .viewtoggle{display:flex;gap:6px;margin-left:auto}
+  .vt-btn{font-family:var(--mono);font-size:11px;color:var(--mut);background:transparent;border:1px solid var(--line);padding:5px 12px;border-radius:99px;cursor:pointer}
+  .vt-btn.on{background:var(--ink);color:#0a0a0a;border-color:var(--ink);font-weight:700}
+  .vt-btn:hover{border-color:var(--mut)}
+
+  /* 목록 뷰 */
+  .clist{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .crow{display:grid;grid-template-columns:14px 1.4fr 1fr auto auto;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line2)}
+  .crow:last-child{border-bottom:none}
+  .crow:hover{background:#181818}
+  .crow .cdot{width:9px;height:9px;border-radius:2px;flex:none}
+  .crow .cbrand{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crow .cchan{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crow .cdate{font-family:var(--mono);font-size:12px;color:var(--ph-stock);text-align:right;white-space:nowrap}
+  .crow .cfigs{display:flex;gap:14px;font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap}
+  .crow .cfigs b{color:var(--ink);font-weight:700}
+  .crow .cfigs span{color:var(--mut2);font-size:10px;display:block}
+
+  /* 월간 캘린더 뷰 */
+  .calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .calnav{display:flex;align-items:center;gap:14px}
+  .calnav button{background:var(--panel);border:1px solid var(--line);color:var(--ink);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px}
+  .calnav button:hover{border-color:var(--mut)}
+  .calmonth{font-weight:700;font-size:16px;min-width:90px;text-align:center}
+  .cal{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);background:var(--panel);border-bottom:1px solid var(--line)}
+  .cal-dow span{padding:8px 0;text-align:center;font-family:var(--mono);font-size:11px;color:var(--mut2)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .cal-cell{min-height:96px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:6px;position:relative}
+  .cal-cell:nth-child(7n){border-right:none}
+  .cal-cell.out{opacity:.35}
+  .cal-cell.today{background:rgba(244,6,6,.08)}
+  .cal-cell .cdnum{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-bottom:4px}
+  .cal-cell.today .cdnum{color:var(--red);font-weight:700}
+  .cal-evt{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+  .cal-more{font-family:var(--mono);font-size:9px;color:var(--mut2);padding:1px 5px}
+  .cal-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:var(--mut)}
+  .cal-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 
   .legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px;font-size:12px;color:var(--mut)}
   .legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
@@ -184,7 +210,7 @@
   .nolink{font-family:var(--mono);font-size:12px;color:var(--mut2);padding:10px 0}
   footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--mut2);line-height:1.7}
   footer b{color:var(--mut)}
-  @media(max-width:760px){.tbx{width:100%}.task{grid-template-columns:1fr auto}.task .tt{grid-column:1/-1;order:3}}
+  @media(max-width:760px){.task{grid-template-columns:1fr auto}.task .tt{grid-column:1/-1;order:3}.crow{grid-template-columns:14px 1fr auto;grid-template-areas:"dot brand date" "dot chan figs";row-gap:4px}.crow .cdot{grid-area:dot}.crow .cbrand{grid-area:brand}.crow .cdate{grid-area:date}.crow .cchan{grid-area:chan}.crow .cfigs{grid-area:figs}.cal-cell{min-height:64px}}
 </style>
 </head>
 <body>
@@ -216,7 +242,6 @@
           <span id="m-time"></span>
         </div>
       </div>
-      <div class="tbx" id="todobox"></div>
     </div>
   </header>
   <nav class="nav">
@@ -226,7 +251,7 @@
   <main id="view"></main>
   <footer>
     <b>데이터 흐름</b> Monday GraphQL + Google Sheets(마스터 타임라인 직접 파싱) → Vercel serverless → 이 페이지<br>
-    가까운 일정 박스 = 진행 단계 + 다음 단계까지 D-day 자동 계산 · 빨강 세로줄 = 이번 주
+    빨강 세로줄 = 이번 주
   </footer>
 </div>
 <div class="scrim" id="scrim"></div>
@@ -341,7 +366,7 @@ const CHECK=[
 const DEFAULT_QUOTE="오늘 하루도 단단하게 ✊"; // API 연결 실패 시 폴백 문구
 let currentQuote=DEFAULT_QUOTE;
 
-let commerce=DEMO_COMMERCE, production=DEMO_PRODUCTION, activeTab="전체";
+let commerce=DEMO_COMMERCE, production=DEMO_PRODUCTION, activeTab="전체", commerceViewMode="list";
 const TODAY=new Date(), START=new Date(2026,5,29);
 const TODAY_MID=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
 const curSlot=Math.floor((TODAY-START)/(7*864e5))+1;
@@ -362,11 +387,22 @@ function statusOf(p){const st=stockSlot(p);if(st<curSlot)return 'done';if(startS
 const STAT={now:{t:"진행중",c:"now"},soon:{t:"예정",c:"soon"},done:{t:"입고완료",c:"done"}};
 function matchPC(p,c){const item=norm(p.item),b=norm(c.brand);for(let i=0;i<item.length-1;i++){if(b.includes(item.substr(i,2)))return true;}return false;}
 function findSale(p){return commerce.find(c=>matchPC(p,c));}
-function cdate(s){const m=(s||'').match(/(\d+)월\s*(\d+)/);return m?new Date(2026,+m[1]-1,+m[2]):new Date(2100,0,1);}
-// 판매일정 텍스트에서 종료일을 파싱. "6월 23-7월 5" 같은 범위면 두 번째(월,일)를 종료일로,
-// "6월 25-30"처럼 일자만 반복되면 같은 달의 두 번째 일자를, 단일 날짜면 그 날짜를 종료일로 본다.
+// 판매일정 텍스트의 시작일을 파싱. Monday 날짜 범위는 "2026-06-01 - 2026-06-10" 형식(ISO),
+// 수기로 입력된 경우 "6월 1 - 30" 같은 한글 형식일 수도 있어 둘 다 지원한다.
+function cdate(s){
+  s=(s||'').trim();
+  const iso=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
+  const m=s.match(/(\d+)월\s*(\d+)/);
+  return m?new Date(2026,+m[1]-1,+m[2]):new Date(2100,0,1);
+}
+// 판매일정 텍스트에서 종료일을 파싱. ISO 범위("2026-06-01 - 2026-06-10")는 두 번째 날짜를,
+// "6월 23-7월 5" 같은 한글 범위는 두 번째(월,일)를, "6월 25-30"처럼 일자만 반복되면 같은 달의
+// 두 번째 일자를, 단일 날짜면 그 날짜를 종료일로 본다.
 function cdateEnd(s){
-  s=s||'';
+  s=(s||'').trim();
+  const isos=[...s.matchAll(/(\d{4})-(\d{1,2})-(\d{1,2})/g)];
+  if(isos.length){const last=isos[isos.length-1];return new Date(+last[1],+last[2]-1,+last[3]);}
   const ms=[...s.matchAll(/(\d+)월\s*(\d+)/g)];
   if(ms.length>=2){const last=ms[ms.length-1];return new Date(2026,+last[1]-1,+last[2]);}
   if(ms.length===1){
@@ -386,55 +422,6 @@ function ddCls(dl){return dl<0?"over":dl<=3?"soon":"ok";}
 function moneyLabel(dl){return dl<0?"지남":dl===0?"D-DAY":"D-"+dl;}
 function moneyCls(dl){return dl<0?"past":dl===0?"dday":dl<=3?"soon":"ok";}
 function anchorDate(p){const s=findSale(p);return s?cdate(s.date):slotToDate(stockSlot(p));}
-// 현재 슬롯 기준으로 진행 중인 생산 단계와, 다음 단계까지 며칠 남았는지 계산
-function currentPhaseInfo(p){
-  const phs=p.ph;
-  for(let k=0;k<phs.length;k++){
-    const [t,s,e]=phs[k];
-    if(curSlot>=s&&curSlot<=e){
-      const next=phs[k+1];
-      if(next){
-        const nextStart=slotToDate(next[1]);
-        return {curPhase:t,curLabel:PHASE[t].ko+' 중',nextPhase:next[0],nextLabel:PHASE[next[0]].ko,nextAmount:next[3]||0,due:nextStart};
-      }
-      // 마지막 단계(보통 입고)면 그 단계 종료일을 due로
-      return {curPhase:t,curLabel:PHASE[t].ko+(t==='stock'?' 예정':' 중'),nextPhase:null,nextLabel:null,nextAmount:0,due:slotToDate(e)};
-    }
-  }
-  // 아직 시작 전이면 첫 단계 시작일을, 이미 다 지났으면 마지막 단계 종료일을 due로
-  const first=phs[0],last=phs[phs.length-1];
-  if(curSlot<first[1])return {curPhase:null,curLabel:PHASE[first[0]].ko+' 예정',nextPhase:first[0],nextLabel:PHASE[first[0]].ko,nextAmount:first[3]||0,due:slotToDate(first[1])};
-  return {curPhase:last[0],curLabel:PHASE[last[0]].ko+' 완료',nextPhase:null,nextLabel:null,nextAmount:0,due:slotToDate(last[2])};
-}
-function allTasks(){
-  const out=[];
-  production.forEach((p,i)=>{
-    const A=anchorDate(p);
-    CHECK.forEach(c=>out.push({i,kind:'check',team:c.team,title:c.t,due:new Date(A.getTime()-c.d*864e5)}));
-    const info=currentPhaseInfo(p);
-    out.push({i,kind:'prod',team:'생산',curLabel:info.curLabel,nextPhase:info.nextPhase,nextLabel:info.nextLabel,nextAmount:info.nextAmount,title:info.nextLabel?(info.nextLabel+' 임박'):info.curLabel,due:info.due});
-  });
-  return out.map(x=>({...x,dl:daysLeft(x.due),p:production[x.i]}));
-}
-
-/* 가까운 일정 네모 박스 */
-function renderTodo(){
-  let ts=allTasks().filter(t=>t.dl>=-7&&t.dl<=21).sort((a,b)=>a.due-b.due).slice(0,30);
-  let body=ts.length?ts.map(t=>{
-    const tc=TEAMC[t.team];
-    let sub,badge;
-    if(t.kind==='prod'){
-      sub=t.curLabel;
-      badge=t.nextLabel?(t.nextLabel+' '+(t.dl===0?'D-DAY':'D-'+t.dl)):ddLabel(t.dl);
-      if(t.nextPhase==='deposit'&&t.nextAmount>0)sub=t.curLabel+' · 선금 '+won(t.nextAmount)+'원';
-    }else{
-      sub=t.team+' · '+t.title;
-      badge=ddLabel(t.dl);
-    }
-    return '<div class="tbi" data-i="'+t.i+'"><span class="dot2" style="background:'+tc.c+'"></span><div class="tbtx"><div class="tbn">'+t.p.item+'</div><div class="tbt">'+sub+'</div></div><span class="tbd '+ddCls(t.dl)+'">'+badge+'</span></div>';
-  }).join(''):'<div class="empty2">예정된 급한 일정 없음</div>';
-  document.getElementById('todobox').innerHTML='<h3>가까운 일정 <b>'+ts.length+'</b></h3><div class="tblist">'+body+'</div>';
-}
 
 /* 간트 — 오늘이 속한 주(curSlot)가 항상 캘린더의 맨 왼쪽 첫 칸이 되도록 슬라이딩 */
 const GANTT_WEEKS=24; // 화면에 보이는 주 수
@@ -478,15 +465,83 @@ function ganttBlock(list){
   if(done.length)html+='<button class="toggle" data-toggle="done-group"><span><span class="arw">▸</span> 입고 완료 '+done.length+'건</span><span>펼치기</span></button><div class="collapsed" id="done-group">'+done.map(x=>rowHTML(x.p,x.i)).join('')+'</div>';
   return html+'</div></div>';
 }
-function cardsHTML(list){return '<div class="cards">'+list.map(c=>'<div class="card"><div class="brand">'+c.brand+'</div><div class="chan">'+c.channel+'</div><div class="row"><span class="date">'+c.date+'</span><span class="rev">'+won(c.revenue)+'<span> 목표</span></span></div></div>').join('')+'</div>';}
+function cardsHTML(list){return '<div class="cards">'+list.map(c=>'<div class="card"><div class="brand">'+c.brand+'</div><div class="chan">'+c.channel+'</div><div class="row"><span class="date">'+c.date+'</span><div class="figs"><div class="fig"><b>'+won(c.deal)+'</b><span>거래액</span></div><div class="fig"><b>'+won(c.actual)+'</b><span>실매출</span></div></div></div></div>').join('')+'</div>';}
 function isClosed(c){return cdateEnd(c.date)<TODAY_MID;}
-function commerceCards(list){const open=list.filter(c=>!isClosed(c));return open.length?cardsHTML(open):'<div class="empty">진행 중인 커머스 판매 일정 없음</div>';}
+
+/* 채널/크리에이터명 기준 해시 → 12색 팔레트에서 일관된 색 배정 */
+const CH_COLORS=['var(--ch-0)','var(--ch-1)','var(--ch-2)','var(--ch-3)','var(--ch-4)','var(--ch-5)','var(--ch-6)','var(--ch-7)','var(--ch-8)','var(--ch-9)','var(--ch-10)','var(--ch-11)'];
+function chanColor(name){
+  const s=(name||'').trim()||'미지정';
+  let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
+  return CH_COLORS[h%CH_COLORS.length];
+}
+
+/* 목록 뷰: 날짜순 한 줄 리스트 */
+function listHTML(list){
+  if(!list.length)return '<div class="empty">진행 중인 커머스 판매 일정 없음</div>';
+  const rows=list.slice().sort((a,b)=>cdate(a.date)-cdate(b.date)).map(c=>{
+    const col=chanColor(c.channel);
+    return '<div class="crow"><span class="cdot" style="background:'+col+'"></span><span class="cbrand" title="'+c.brand+'">'+c.brand+'</span><span class="cchan">'+(c.channel||'-')+'</span><span class="cdate">'+c.date+'</span><span class="cfigs"><span><b>'+won(c.deal)+'</b><span>거래액</span></span><span><b>'+won(c.actual)+'</b><span>실매출</span></span></span></div>';
+  }).join('');
+  return '<div class="clist">'+rows+'</div>';
+}
+
+/* 캘린더 뷰: 월간 그리드, 채널/크리에이터별 색상으로 겹침 직관 확인 */
+let calCursor=null; // {y, m} - null이면 오늘이 속한 달로 초기화
+function calendarHTML(list, brand){
+  if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};
+  const {y,m}=calCursor;
+  const first=new Date(y,m,1);
+  const startDow=first.getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const prevDays=new Date(y,m,0).getDate();
+  const cells=[];
+  for(let i=0;i<startDow;i++)cells.push({d:prevDays-startDow+1+i,out:true,y:m===0?y-1:y,m:m===0?11:m-1});
+  for(let d=1;d<=daysInMonth;d++)cells.push({d,out:false,y,m});
+  while(cells.length%7!==0||cells.length<35)cells.push({d:cells.length-startDow-daysInMonth+1,out:true,y:m===11?y+1:y,m:m===11?0:m+1});
+  const byDay={};
+  const rangeStart=new Date(y,m,1),rangeEnd=new Date(y,m+1,0);
+  list.forEach(c=>{
+    const s=cdate(c.date),e=cdateEnd(c.date);
+    if(isNaN(s)||isNaN(e))return;
+    if(e<rangeStart||s>rangeEnd)return; // 이 달과 전혀 겹치지 않으면 스킵
+    let cur=new Date(Math.max(s,rangeStart));
+    const stop=new Date(Math.min(e,rangeEnd));
+    while(cur<=stop){
+      (byDay[cur.getDate()]=byDay[cur.getDate()]||[]).push(c);
+      cur=new Date(cur.getFullYear(),cur.getMonth(),cur.getDate()+1);
+    }
+  });
+  const dow=['일','월','화','수','목','금','토'];
+  const dowHTML=dow.map(d=>'<span>'+d+'</span>').join('');
+  const gridHTML=cells.map(c=>{
+    const isToday=!c.out&&c.y===TODAY.getFullYear()&&c.m===TODAY.getMonth()&&c.d===TODAY.getDate();
+    const evts=c.out?[]:(byDay[c.d]||[]);
+    const shown=evts.slice(0,3);
+    const evtHTML=shown.map(c2=>'<div class="cal-evt" style="background:'+chanColor(c2.channel)+'22;color:'+chanColor(c2.channel)+'" title="'+c2.brand+' · '+(c2.channel||'')+'">'+c2.brand+'</div>').join('');
+    const moreHTML=evts.length>3?'<div class="cal-more">+'+(evts.length-3)+'건</div>':'';
+    return '<div class="cal-cell'+(c.out?' out':'')+(isToday?' today':'')+'"><div class="cdnum">'+c.d+'</div>'+evtHTML+moreHTML+'</div>';
+  }).join('');
+  const chans=[...new Set(list.map(c=>c.channel).filter(Boolean))].slice(0,12);
+  const legendHTML=chans.map(ch=>'<span><i style="background:'+chanColor(ch)+'"></i>'+ch+'</span>').join('');
+  const navAttr=brand?(' data-brand="'+brand+'"'):'';
+  return '<div class="calhead"><div class="calnav"'+navAttr+'><button class="cal-prev">‹</button><span class="calmonth">'+(m+1)+'월 '+y+'</span><button class="cal-next">›</button></div></div>'+
+    '<div class="cal"><div class="cal-dow">'+dowHTML+'</div><div class="cal-grid">'+gridHTML+'</div></div>'+
+    (chans.length?'<div class="cal-legend">'+legendHTML+'</div>':'');
+}
+
+function commerceCardsToggle(list, brand){
+  const open=list.filter(c=>!isClosed(c));
+  const mode=commerceViewMode;
+  const body=!open.length?'<div class="empty">진행 중인 커머스 판매 일정 없음</div>':(mode==='cal'?calendarHTML(open,brand):listHTML(open));
+  return '<div class="viewtoggle"><button class="vt-btn'+(mode==='list'?' on':'')+'" data-vt="list">목록</button><button class="vt-btn'+(mode==='cal'?' on':'')+'" data-vt="cal">캘린더</button></div>'+body;
+}
 
 /* 뷰: 브랜드 / 전체 */
 function viewAll(brand){
   const list=production.map((p,i)=>({p,i})).filter(x=>!brand||x.p.brand===brand);
   let comm=brand?commerce.filter(c=>list.some(x=>matchPC(x.p,c))):commerce.slice().sort((a,b)=>cdate(a.date)-cdate(b.date));
-  return '<section class="sec"><div class="sec-head"><span class="sec-num">01</span><span class="sec-title">PB 커머스 판매 일정</span><span class="sec-src">'+(brand||'가까운 순')+' · Monday</span></div>'+commerceCards(comm)+'</section>'+
+  return '<section class="sec"><div class="sec-head"><span class="sec-num">01</span><span class="sec-title">PB 커머스 판매 일정</span><span class="sec-src">'+(brand||'가까운 순')+' · Monday</span></div>'+commerceCardsToggle(comm,brand)+'</section>'+
     '<section class="sec"><div class="sec-head"><span class="sec-num">02</span><span class="sec-title">PB 샘플링 · 생산 타임라인</span><span class="sec-src">'+list.length+'품목 · Sheet</span></div>'+
     '<div class="legend"><span><i style="background:var(--ph-plan)"></i>기획</span><span><i style="background:var(--ph-sample)"></i>샘플링</span><span><i style="background:var(--ph-deposit)"></i>선금</span><span><i style="background:var(--ph-prod)"></i>생산</span><span><i style="background:var(--ph-stock)"></i>입고예정</span><span><i style="background:var(--ph-etc)"></i>용기/CT</span></div>'+
     (list.length?ganttBlock(list):'<div class="empty">해당 브랜드 품목 없음</div>')+'</section>';
@@ -523,19 +578,22 @@ function viewSales(){
   const groups={};
   commerce.forEach(c=>{const k=monthKey(c);(groups[k]=groups[k]||{key:k,label:monthName(c),items:[]}).items.push(c);});
   const sorted=Object.values(groups).sort((a,b)=>a.key-b.key);
-  const tot=commerce.reduce((a,c)=>a+Number(c.revenue||0),0);
+  const curGroup=groups[curKey];
+  const curDeal=curGroup?curGroup.items.reduce((a,c)=>a+Number(c.deal||0),0):0;
+  const curActual=curGroup?curGroup.items.reduce((a,c)=>a+Number(c.actual||0),0):0;
   let body='';
   sorted.forEach(g=>{
     g.items.sort((a,b)=>cdate(a.date)-cdate(b.date));
-    const isPast=g.key<curKey;
     const gid='salesmonth-'+g.key;
-    if(isPast){
-      body+='<button class="toggle" data-toggle="'+gid+'"><span><span class="arw">▸</span> '+g.label+' · '+g.items.length+'건 (지난 달)</span><span>펼치기</span></button><div class="collapsed" id="'+gid+'">'+cardsHTML(g.items)+'</div>';
+    if(g.key===curKey){
+      body+='<div class="sec-head" style="margin:22px 0 10px"><span class="sec-title" style="font-size:15px">'+g.label+' · 이번 달</span><span class="sec-src">'+g.items.length+'건</span></div>'+cardsHTML(g.items);
     }else{
-      body+='<div class="sec-head" style="margin:22px 0 10px"><span class="sec-title" style="font-size:15px">'+g.label+(g.key===curKey?' · 이번 달':'')+'</span><span class="sec-src">'+g.items.length+'건</span></div>'+cardsHTML(g.items);
+      const tag=g.key<curKey?'지난 달':'다음 달';
+      body+='<button class="toggle" data-toggle="'+gid+'"><span><span class="arw">▸</span> '+g.label+' · '+g.items.length+'건 ('+tag+')</span><span>펼치기</span></button><div class="collapsed" id="'+gid+'">'+cardsHTML(g.items)+'</div>';
     }
   });
-  return '<section class="sec"><div class="sec-head"><span class="sec-num">★</span><span class="sec-title">매출 현황</span><span class="sec-src">PB 커머스 · Monday</span></div><div class="totbar"><div><div class="ti2">PB 판매 건수</div><div class="tv">'+commerce.length+'건</div></div><div><div class="ti2">목표 매출 합계</div><div class="tv">'+won(tot)+'원</div></div></div>'+body+'<div class="note">실매출 vs 목표는 Monday \'거래액\' 컬럼 연동 시 자동 표시 · 월이 지나면 자동으로 접힘</div></section>';
+  const curLabel=curGroup?curGroup.label:monthName({date:TODAY.getFullYear()+'-'+(TODAY.getMonth()+1)+'-1'});
+  return '<section class="sec"><div class="sec-head"><span class="sec-num">★</span><span class="sec-title">매출 현황</span><span class="sec-src">'+curLabel+' · Monday</span></div><div class="totbar"><div><div class="ti2">'+curLabel+' PB 판매 건수</div><div class="tv">'+(curGroup?curGroup.items.length:0)+'건</div></div><div><div class="ti2">거래액 합계</div><div class="tv">'+won(curDeal)+'원</div></div><div><div class="ti2">실매출 합계</div><div class="tv">'+won(curActual)+'원</div></div></div>'+body+'<div class="note">거래액·실매출은 Monday \'거래액\'·\'실매출\' 컬럼과 자동 연동 · 이번 달만 기본으로 펼쳐짐</div></section>';
 }
 
 /* 렌더 */
@@ -544,7 +602,7 @@ const UTIL=["입고 임박","자금","매출"];
 function renderNav(){
   document.getElementById('navtabs').innerHTML=['전체',...brands()].map(v=>'<button class="tab'+(activeTab===v?' on':'')+'" data-tab="'+v+'">'+v+'</button>').join('');
   document.getElementById('navutil').innerHTML=UTIL.map(v=>'<button class="tab util'+(activeTab===v?' on':'')+'" data-tab="'+v+'">'+v+'</button>').join('');
-  document.querySelectorAll('.nav .tab').forEach(t=>t.onclick=()=>{activeTab=t.dataset.tab;render();});
+  document.querySelectorAll('.nav .tab').forEach(t=>t.onclick=()=>{activeTab=t.dataset.tab;calCursor=null;render();});
 }
 function renderView(){
   let v;
@@ -556,8 +614,11 @@ function renderView(){
   document.getElementById('tabname').textContent=activeTab;
   document.querySelectorAll('.grow,.task').forEach(g=>g.onclick=()=>openDetail(+g.dataset.i));
   document.querySelectorAll('.toggle').forEach(b=>b.onclick=()=>{const g=document.getElementById(b.dataset.toggle);const open=g.classList.toggle('collapsed')===false;b.classList.toggle('open',open);b.querySelector('span:last-child').textContent=open?'접기':'펼치기';});
+  document.querySelectorAll('.vt-btn').forEach(b=>b.onclick=()=>{commerceViewMode=b.dataset.vt;calCursor=null;renderView();});
+  document.querySelectorAll('.cal-prev').forEach(b=>b.onclick=()=>{if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};calCursor.m--;if(calCursor.m<0){calCursor.m=11;calCursor.y--;}renderView();});
+  document.querySelectorAll('.cal-next').forEach(b=>b.onclick=()=>{if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};calCursor.m++;if(calCursor.m>11){calCursor.m=0;calCursor.y++;}renderView();});
 }
-function render(){renderNav();renderView();renderTodo();document.querySelectorAll('.tbi').forEach(g=>g.onclick=()=>openDetail(+g.dataset.i));}
+function render(){renderNav();renderView();}
 
 function openDetail(i){
   const p=production[i],sale=findSale(p),st=statusOf(p),A=anchorDate(p);
