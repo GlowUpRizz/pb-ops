@@ -89,16 +89,17 @@
 
   /* 목록 뷰 */
   .clist{border:1px solid var(--line);border-radius:6px;overflow:hidden}
-  .crow{display:grid;grid-template-columns:14px 1.4fr 1fr auto auto;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line2)}
+  .crow{display:grid;grid-template-columns:14px 1.6fr 1fr 190px 190px;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line2)}
   .crow:last-child{border-bottom:none}
   .crow:hover{background:#181818}
   .crow .cdot{width:9px;height:9px;border-radius:2px;flex:none}
   .crow .cbrand{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .crow .cchan{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crow .cchan{font-family:var(--mono);font-size:12px;color:#d8d8d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .crow .cdate{font-family:var(--mono);font-size:12px;color:var(--ph-stock);text-align:right;white-space:nowrap}
-  .crow .cfigs{display:flex;gap:14px;font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap}
-  .crow .cfigs b{color:var(--ink);font-weight:700}
-  .crow .cfigs span{color:var(--mut2);font-size:10px;display:block}
+  .crow .cfigs{display:flex;justify-content:flex-end;gap:14px;font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap}
+  .crow .cfigs>span{width:84px}
+  .crow .cfigs b{color:var(--ink);font-weight:700;display:block}
+  .crow .cfigs span span{color:var(--mut2);font-size:10px;display:block}
 
   /* 월간 캘린더 뷰 — 주 단위로 일정이 가로 막대로 이어짐 */
   .calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
@@ -647,10 +648,10 @@ function viewSales(){
     g.items.sort((a,b)=>cdate(a.date)-cdate(b.date));
     const gid='salesmonth-'+g.key;
     if(g.key===curKey){
-      body+='<div class="sec-head" style="margin:22px 0 10px"><span class="sec-title" style="font-size:15px">'+g.label+' · 이번 달</span><span class="sec-src">'+g.items.length+'건</span></div>'+cardsHTML(g.items);
+      body+='<div class="sec-head" style="margin:22px 0 10px"><span class="sec-title" style="font-size:15px">'+g.label+' · 이번 달</span><span class="sec-src">'+g.items.length+'건</span></div>'+listHTML(g.items);
     }else{
       const tag=g.key<curKey?'지난 달':'다음 달';
-      body+='<button class="toggle" data-toggle="'+gid+'"><span><span class="arw">▸</span> '+g.label+' · '+g.items.length+'건 ('+tag+')</span><span>펼치기</span></button><div class="collapsed" id="'+gid+'">'+cardsHTML(g.items)+'</div>';
+      body+='<button class="toggle" data-toggle="'+gid+'"><span><span class="arw">▸</span> '+g.label+' · '+g.items.length+'건 ('+tag+')</span><span>펼치기</span></button><div class="collapsed" id="'+gid+'">'+listHTML(g.items)+'</div>';
     }
   });
   const curLabel=curGroup?curGroup.label:monthName({date:TODAY.getFullYear()+'-'+(TODAY.getMonth()+1)+'-1'});
@@ -742,7 +743,7 @@ function bindQedit(){
         const r=await fetch('/api/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pw:adminPw,quote:val})});
         const j=await r.json();
         if(r.ok){currentQuote=j.quote;restoreQuoteUI();}
-        else{document.getElementById('qmsg').textContent=j.error||'저장 실패';}
+        else{document.getElementById('qmsg').textContent=(j.error||'저장 실패')+(j.debug?(' / 서버:'+j.debug.envAdminPwMasked+' 받은값:'+j.debug.receivedPwMasked+' ('+j.debug.envSource+')'):'');}
       }catch(e){document.getElementById('qmsg').textContent='저장 실패(네트워크)';}
     };
     document.getElementById('qsave').onclick=doSave;
