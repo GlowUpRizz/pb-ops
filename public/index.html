@@ -471,7 +471,7 @@ function ganttBlock(list){
   const active=list.filter(x=>statusOf(x.p)!=='done'),done=list.filter(x=>statusOf(x.p)==='done');
   active.sort((a,b)=>(statusOf(a.p)==='now'?0:1)-(statusOf(b.p)==='now'?0:1)||startSlot(a.p)-startSlot(b.p));
   let html='<div class="gantt"><div class="gantt-inner">'+ganttHead()+active.map(x=>rowHTML(x.p,x.i)).join('');
-  if(done.length)html+='<button class="toggle" data-toggle="done-group"><span><span class="arw">▸</span> 입고 완료 '+done.length+'건</span><span>펼치기</span></button><div class="collapsed" id="done-group">'+done.map(x=>rowHTML(x.p,x.i)).join('')+'</div>';
+  if(done.length)html+='<button class="toggle" data-toggle="done-group"><span><span class="arw">▸</span> 입고 완료 '+done.length+'건</span></button><div class="collapsed" id="done-group">'+done.map(x=>rowHTML(x.p,x.i)).join('')+'</div>';
   return html+'</div></div>';
 }
 function cardsHTML(list){return '<div class="cards">'+list.map(c=>'<div class="card"><div class="brand">'+c.brand+'</div><div class="chan">'+c.channel+'</div><div class="row"><span class="date">'+c.date+'</span><div class="figs"><div class="fig"><b>'+won(c.deal)+'</b><span>거래액</span></div><div class="fig"><b>'+won(c.actual)+'</b><span>실매출</span></div></div></div></div>').join('')+'</div>';}
@@ -647,11 +647,14 @@ function viewSales(){
   sorted.forEach(g=>{
     g.items.sort((a,b)=>cdate(a.date)-cdate(b.date));
     const gid='salesmonth-'+g.key;
+    const gDeal=g.items.reduce((a,c)=>a+Number(c.deal||0),0);
+    const gActual=g.items.reduce((a,c)=>a+Number(c.actual||0),0);
+    const sumTxt=' · 거래액 '+won(gDeal)+'원 · 실매출 '+won(gActual)+'원';
     if(g.key===curKey){
       body+='<div class="sec-head" style="margin:22px 0 10px"><span class="sec-title" style="font-size:15px">'+g.label+' · 이번 달</span><span class="sec-src">'+g.items.length+'건</span></div>'+listHTML(g.items);
     }else{
       const tag=g.key<curKey?'지난 달':'다음 달';
-      body+='<button class="toggle" data-toggle="'+gid+'"><span><span class="arw">▸</span> '+g.label+' · '+g.items.length+'건 ('+tag+')</span><span>펼치기</span></button><div class="collapsed" id="'+gid+'">'+listHTML(g.items)+'</div>';
+      body+='<button class="toggle" data-toggle="'+gid+'"><span><span class="arw">▸</span> '+g.label+' · '+g.items.length+'건 ('+tag+')'+sumTxt+'</span></button><div class="collapsed" id="'+gid+'">'+listHTML(g.items)+'</div>';
     }
   });
   const curLabel=curGroup?curGroup.label:monthName({date:TODAY.getFullYear()+'-'+(TODAY.getMonth()+1)+'-1'});
@@ -675,7 +678,7 @@ function renderView(){
   document.getElementById('view').innerHTML=v;
   document.getElementById('tabname').textContent=activeTab;
   document.querySelectorAll('.grow,.task').forEach(g=>g.onclick=()=>openDetail(+g.dataset.i));
-  document.querySelectorAll('.toggle').forEach(b=>b.onclick=()=>{const g=document.getElementById(b.dataset.toggle);const open=g.classList.toggle('collapsed')===false;b.classList.toggle('open',open);b.querySelector('span:last-child').textContent=open?'접기':'펼치기';});
+  document.querySelectorAll('.toggle').forEach(b=>b.onclick=()=>{const g=document.getElementById(b.dataset.toggle);const open=g.classList.toggle('collapsed')===false;b.classList.toggle('open',open);});
   document.querySelectorAll('.vt-btn').forEach(b=>b.onclick=()=>{commerceViewMode=b.dataset.vt;calCursor=null;renderView();});
   document.querySelectorAll('.cal-prev').forEach(b=>b.onclick=()=>{if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};calCursor.m--;if(calCursor.m<0){calCursor.m=11;calCursor.y--;}renderView();});
   document.querySelectorAll('.cal-next').forEach(b=>b.onclick=()=>{if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};calCursor.m++;if(calCursor.m>11){calCursor.m=0;calCursor.y++;}renderView();});
@@ -743,7 +746,7 @@ function bindQedit(){
         const r=await fetch('/api/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pw:adminPw,quote:val})});
         const j=await r.json();
         if(r.ok){currentQuote=j.quote;restoreQuoteUI();}
-        else{document.getElementById('qmsg').textContent=(j.error||'저장 실패')+(j.debug?(' / 서버:'+j.debug.envAdminPwMasked+' 받은값:'+j.debug.receivedPwMasked+' ('+j.debug.envSource+')'):'');}
+        else{document.getElementById('qmsg').textContent=(j.error||'저장 실패')+(j.debug?(' / 서버:'+j.debug.envAdminPwMasked+' 받은값:'+j.debug.receivedPwMasked+' ('+j.debug.envSource+') '+j.debug.looksLikeKeyFragment):'');}
       }catch(e){document.getElementById('qmsg').textContent='저장 실패(네트워크)';}
     };
     document.getElementById('qsave').onclick=doSave;
