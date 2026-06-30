@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PB OPS — 통합 일정</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#121212; --line:#262626; --line2:#1a1a1a;
+    --ink:#f5f5f5; --mut:#8a8a8a; --mut2:#5c5c5c; --red:#F40606; --pur:#A575F0; --blu:#4DA6FF;
+    --ph-plan:#3a3a3a; --ph-sample:#E8C547; --ph-deposit:#F40606; --ph-prod:#5BB97A; --ph-stock:#E08A2B; --ph-etc:#7C7C7C;
+    --mono:'Space Mono',monospace;
+    --ch-0:#E24B4A; --ch-1:#378ADD; --ch-2:#639922; --ch-3:#BA7517; --ch-4:#A575F0; --ch-5:#D4537E;
+    --ch-6:#1D9E75; --ch-7:#D85A30; --ch-8:#5DCAA5; --ch-9:#888780; --ch-10:#85B7EB; --ch-11:#EF9F27;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:'Pretendard',sans-serif;-webkit-font-smoothing:antialiased;padding:0 0 80px}
+  .wrap{max-width:1640px;margin:0 auto;padding:0 28px}
+
+  header{padding:22px 0 14px}
+  .hbar{display:flex;justify-content:space-between;align-items:center;gap:16px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.28em;color:var(--red);text-transform:uppercase}
+  .hmeta{display:flex;align-items:center;gap:16px}
+  .today{font-family:var(--mono);font-size:12px;color:var(--mut)}
+  .today b{color:var(--ink)}
+  .quote{font-size:12px;color:var(--mut);font-style:italic;max-width:240px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .quotewrap{display:inline-flex;align-items:center;gap:6px}
+  .qedit{background:none;border:1px solid var(--line);color:var(--mut2);border-radius:5px;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;flex:none}
+  .qedit:hover{color:var(--ink);border-color:var(--mut)}
+  .quote-input{background:#0a0a0a;border:1px solid var(--red);color:var(--ink);font-size:12px;font-style:italic;padding:3px 8px;border-radius:5px;width:220px;font-family:inherit}
+  .quote-input:focus{outline:none}
+  .qsave{background:var(--red);color:#fff;border:none;border-radius:5px;padding:0 9px;font-size:11px;font-weight:700;cursor:pointer;height:24px}
+  .qmsg{font-family:var(--mono);font-size:10px;color:var(--mut2)}
+  .hmain{display:flex;justify-content:space-between;align-items:flex-start;gap:28px;margin-top:14px;flex-wrap:wrap}
+  .hleft{flex:1;min-width:260px}
+  h1{font-size:clamp(28px,4vw,46px);font-weight:800;line-height:1;letter-spacing:-.02em}
+  h1 .slash{color:var(--mut2);font-weight:400}
+  .sub{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--mut)}
+  .sub b{color:var(--ink)}
+  .live{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ph-prod);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(91,185,122,.5)}70%{box-shadow:0 0 0 6px rgba(91,185,122,0)}100%{box-shadow:0 0 0 0 rgba(91,185,122,0)}}
+
+  /* ADMIN */
+  .adminbox{position:relative;display:inline-block}
+  .adminbtn{font-family:var(--mono);font-size:10px;color:var(--mut2);background:none;border:1px solid var(--line);border-radius:99px;padding:5px 12px;cursor:pointer}
+  .adminbtn:hover{color:var(--mut);border-color:var(--mut)}
+  .adminbtn.in{color:var(--ph-prod);border-color:rgba(91,185,122,.4)}
+  .adminpop{position:absolute;right:0;top:32px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;display:none;z-index:60;width:210px;text-align:left}
+  .adminpop.open{display:block}
+  .adminpop input{width:100%;background:#0a0a0a;border:1px solid var(--line);color:#fff;font-family:var(--mono);font-size:13px;padding:9px 11px;border-radius:6px;margin-bottom:8px}
+  .adminpop input:focus{outline:none;border-color:var(--red)}
+  .adminpop .lb{width:100%;background:var(--red);color:#fff;border:none;padding:9px;border-radius:6px;font-weight:700;cursor:pointer}
+  .adminpop .err{color:var(--red);font-family:var(--mono);font-size:11px;height:13px;margin-top:6px}
+  .adminpop .hint{font-family:var(--mono);font-size:10px;color:var(--mut2);margin-top:6px}
+
+  .nav{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);background:var(--bg);flex-wrap:wrap}
+  .navtabs,.navutil{display:flex;gap:6px;overflow-x:auto}
+  .tab{flex:none;background:transparent;border:1px solid var(--line);color:var(--mut);font-family:var(--mono);font-size:12px;padding:8px 14px;border-radius:99px;cursor:pointer;white-space:nowrap}
+  .tab:hover{border-color:var(--mut)}
+  .tab.on{background:var(--ink);color:#0a0a0a;border-color:var(--ink);font-weight:700}
+  .tab.util.on{background:var(--red);color:#fff;border-color:var(--red)}
+
+  .sec{margin-top:34px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:14px}
+  .sec-num{font-family:var(--mono);font-size:12px;color:var(--red)}
+  .sec-title{font-size:20px;font-weight:700;letter-spacing:-.01em}
+  .sec-src{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-left:auto}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:18px;position:relative;overflow:hidden}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
+  .card .brand{font-weight:800;font-size:17px;margin-bottom:4px}
+  .card .chan{font-weight:700;font-size:13px;color:var(--ink)}
+  .card .row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px}
+  .card .date{font-family:var(--mono);font-size:13px;color:var(--ph-stock)}
+  .card .figs{display:flex;gap:14px;font-family:var(--mono)}
+  .card .fig{text-align:right}
+  .card .fig b{display:block;font-size:13px;color:var(--ink);font-weight:700}
+  .card .fig span{font-size:10px;color:var(--mut2)}
+
+  /* 커머스 일정: 목록/캘린더 뷰 토글 */
+  .viewtoggle{display:flex;gap:6px;margin-left:auto}
+  .vt-btn{font-family:var(--mono);font-size:11px;color:var(--mut);background:transparent;border:1px solid var(--line);padding:5px 12px;border-radius:99px;cursor:pointer}
+  .vt-btn.on{background:var(--ink);color:#0a0a0a;border-color:var(--ink);font-weight:700}
+  .vt-btn:hover{border-color:var(--mut)}
+
+  /* 목록 뷰 */
+  .clist{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .crow{display:grid;grid-template-columns:14px 1.4fr 1fr auto auto;gap:14px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line2)}
+  .crow:last-child{border-bottom:none}
+  .crow:hover{background:#181818}
+  .crow .cdot{width:9px;height:9px;border-radius:2px;flex:none}
+  .crow .cbrand{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crow .cchan{font-family:var(--mono);font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .crow .cdate{font-family:var(--mono);font-size:12px;color:var(--ph-stock);text-align:right;white-space:nowrap}
+  .crow .cfigs{display:flex;gap:14px;font-family:var(--mono);font-size:12px;text-align:right;white-space:nowrap}
+  .crow .cfigs b{color:var(--ink);font-weight:700}
+  .crow .cfigs span{color:var(--mut2);font-size:10px;display:block}
+
+  /* 월간 캘린더 뷰 */
+  .calhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .calnav{display:flex;align-items:center;gap:14px}
+  .calnav button{background:var(--panel);border:1px solid var(--line);color:var(--ink);width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:14px}
+  .calnav button:hover{border-color:var(--mut)}
+  .calmonth{font-weight:700;font-size:16px;min-width:90px;text-align:center}
+  .cal{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .cal-dow{display:grid;grid-template-columns:repeat(7,1fr);background:var(--panel);border-bottom:1px solid var(--line)}
+  .cal-dow span{padding:8px 0;text-align:center;font-family:var(--mono);font-size:11px;color:var(--mut2)}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .cal-cell{min-height:96px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);padding:6px;position:relative}
+  .cal-cell:nth-child(7n){border-right:none}
+  .cal-cell.out{opacity:.35}
+  .cal-cell.today{background:rgba(244,6,6,.08)}
+  .cal-cell .cdnum{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-bottom:4px}
+  .cal-cell.today .cdnum{color:var(--red);font-weight:700}
+  .cal-evt{font-size:10px;padding:2px 5px;border-radius:3px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+  .cal-more{font-family:var(--mono);font-size:9px;color:var(--mut2);padding:1px 5px}
+  .cal-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;font-size:11px;color:var(--mut)}
+  .cal-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+  .legend{display:flex;flex-wrap:wrap;gap:16px;margin-bottom:14px;font-size:12px;color:var(--mut)}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .gantt{background:var(--panel);border:1px solid var(--line);border-radius:4px;overflow:auto;max-height:72vh}
+  .gantt-inner{min-width:1640px}
+  .grid-head{display:grid;grid-template-columns:280px 1fr;position:sticky;top:0;z-index:3;background:var(--panel)}
+  .gh-label{padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--mut2);border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+  .months{display:grid;grid-template-columns:repeat(24,1fr);border-bottom:1px solid var(--line)}
+  .month{text-align:center;font-weight:700;font-size:12px;padding:8px 0 2px;border-right:1px solid var(--line2)}
+  .month.q{color:var(--mut)}
+  .weeks{display:grid;grid-template-columns:repeat(24,1fr);border-bottom:1px solid var(--line)}
+  .week{text-align:center;font-family:var(--mono);font-size:9px;color:var(--mut2);padding:3px 0}
+  .week:nth-child(4n){border-right:1px solid var(--line2)}
+  .week.nowcol{background:rgba(244,6,6,.12);color:var(--red)}
+  .grow{display:grid;grid-template-columns:280px 1fr;border-bottom:1px solid var(--line2);cursor:pointer;transition:background .12s}
+  .grow:hover{background:#181818}
+  .glabel{padding:9px 16px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
+  .glabel .gb{display:flex;align-items:center;gap:7px}
+  .glabel .gbrand{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--mut);text-transform:uppercase}
+  .glabel .gcat{font-size:9px;color:var(--mut2);border:1px solid var(--line);border-radius:2px;padding:0 5px;line-height:14px}
+  .gstatus{font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:2px;margin-left:auto;flex:none}
+  .gstatus.now{background:rgba(91,185,122,.18);color:#7fd49b}
+  .gstatus.soon{background:#1f1f1f;color:var(--mut)}
+  .gstatus.done{background:rgba(224,138,43,.18);color:#e0a25b}
+  .glabel .gitem{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .glabel .gsku{font-family:var(--mono);font-size:9px;color:var(--mut2)}
+  .glabel .glink{color:var(--red)}
+  .track{position:relative;display:grid;grid-template-columns:repeat(24,1fr);align-items:center;min-height:40px}
+  .track .cell{border-right:1px solid var(--line2);height:100%}
+  .track .cell:nth-child(4n){border-right:1px solid #222}
+  .track .cell.nowcol{background:rgba(244,6,6,.06)}
+  .bars{position:absolute;inset:0;display:grid;grid-template-columns:repeat(24,1fr);align-items:center}
+  .bar{height:17px;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;margin:0 1px}
+  .bar.plan{background:var(--ph-plan);color:#b5b5b5}.bar.sample{background:var(--ph-sample);color:#0a0a0a}.bar.deposit{background:var(--ph-deposit);color:#fff}.bar.prod{background:var(--ph-prod);color:#0a0a0a}.bar.stock{background:var(--ph-stock);color:#fff}.bar.etc{background:var(--ph-etc);color:#fff}
+  .toggle{background:#0d0d0d;border:none;border-bottom:1px solid var(--line2);color:var(--mut);font-family:var(--mono);font-size:11px;padding:11px 16px;cursor:pointer;width:100%;text-align:left;display:flex;justify-content:space-between;align-items:center}
+  .toggle:hover{color:var(--ink)}
+  .toggle .arw{transition:transform .15s;display:inline-block}
+  .toggle.open .arw{transform:rotate(90deg)}
+  .collapsed{display:none}
+
+  .tasklist{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .task{display:grid;grid-template-columns:1.1fr 1.5fr auto;gap:16px;align-items:center;padding:13px 18px;border-bottom:1px solid var(--line2);cursor:pointer}
+  .task:last-child{border-bottom:none}.task:hover{background:#181818}
+  .task .tb{font-family:var(--mono);font-size:10px;color:var(--mut);text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .task .ti{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .task .tt{display:flex;align-items:center;gap:10px;min-width:0}
+  .task .tt .t2{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .badge{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 9px;border-radius:3px;white-space:nowrap;flex:none}
+  .task .tr{text-align:right;display:flex;flex-direction:column;gap:2px}
+  .task .td{font-family:var(--mono);font-size:13px;font-weight:700}
+  .task .td.over{color:var(--red)}.task .td.soon{color:var(--ph-stock)}.task .td.ok{color:var(--mut)}
+  .task .td.dday{color:var(--red);font-size:14px}
+  .task .td.past{color:var(--mut2)}
+  .task.muted{opacity:.45}
+  .task.muted:hover{opacity:.75}
+  .pastdiv{font-family:var(--mono);font-size:10px;color:var(--mut2);text-transform:uppercase;letter-spacing:.1em;padding:10px 18px 6px;border-top:1px solid var(--line2)}
+  .task .tw{font-family:var(--mono);font-size:11px;color:var(--mut2)}
+  .empty{font-family:var(--mono);font-size:12px;color:var(--mut2);padding:40px;text-align:center;border:1px dashed var(--line);border-radius:6px}
+  .note{font-family:var(--mono);font-size:11px;color:var(--mut2);margin-top:10px}
+  .totbar{display:flex;gap:28px;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 22px;margin-bottom:16px}
+  .totbar .ti2{font-family:var(--mono);font-size:11px;color:var(--mut);text-transform:uppercase}
+  .totbar .tv{font-size:22px;font-weight:800;margin-top:4px}
+
+  .scrim{position:fixed;inset:0;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:.2s;z-index:50}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .detail{position:fixed;top:0;right:0;bottom:0;width:min(470px,92vw);background:#0e0e0e;border-left:1px solid var(--line);transform:translateX(100%);transition:.24s cubic-bezier(.4,0,.2,1);z-index:51;overflow-y:auto;padding:30px 28px 50px}
+  .detail.open{transform:translateX(0)}
+  .detail .close{position:absolute;top:22px;right:24px;background:none;border:none;color:var(--mut);font-size:24px;cursor:pointer;line-height:1}
+  .d-brand{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--mut);text-transform:uppercase}
+  .d-item{font-size:24px;font-weight:800;margin:6px 0 4px;line-height:1.15}
+  .d-meta{font-family:var(--mono);font-size:12px;color:var(--mut2);margin-bottom:8px}
+  .d-h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--red);text-transform:uppercase;margin:24px 0 12px}
+  .phase{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line2)}
+  .phase.cur{background:rgba(244,6,6,.06);margin:0 -10px;padding:10px;border-radius:4px}
+  .phase .pdot{width:10px;height:10px;border-radius:2px;flex:none}
+  .phase .pname{font-weight:600;font-size:14px;flex:1}
+  .phase .pwhen{font-family:var(--mono);font-size:12px;color:var(--mut)}
+  .ck{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--line2)}
+  .ck .cs{width:16px;height:16px;border-radius:4px;flex:none;display:flex;align-items:center;justify-content:center;font-size:10px}
+  .ck .cs.done{background:var(--ph-prod);color:#0a0a0a}.ck .cs.now{background:var(--red);color:#fff}.ck .cs.soon{border:1px solid var(--line);color:var(--mut2)}
+  .ck .cn{flex:1;font-size:13px}
+  .ck .cn small{display:block;color:var(--mut2);font-family:var(--mono);font-size:10px}
+  .ck .ct{font-family:var(--mono);font-size:9px;border:1px solid;border-radius:2px;padding:0 5px}
+  .ck .cw{font-family:var(--mono);font-size:11px;color:var(--mut)}
+  .sale{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--red);border-radius:4px;padding:16px;margin-top:6px}
+  .sale .sb{font-weight:700;font-size:15px}.sale .sm{font-family:var(--mono);font-size:11px;color:var(--mut);margin-top:3px}
+  .sale .sr{display:flex;justify-content:space-between;margin-top:12px;font-family:var(--mono);font-size:13px}.sale .sr .v{color:var(--ph-stock)}
+  .nolink{font-family:var(--mono);font-size:12px;color:var(--mut2);padding:10px 0}
+  footer{margin-top:50px;padding-top:22px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--mut2);line-height:1.7}
+  footer b{color:var(--mut)}
+  @media(max-width:760px){.task{grid-template-columns:1fr auto}.task .tt{grid-column:1/-1;order:3}.crow{grid-template-columns:14px 1fr auto;grid-template-areas:"dot brand date" "dot chan figs";row-gap:4px}.crow .cdot{grid-area:dot}.crow .cbrand{grid-area:brand}.crow .cdate{grid-area:date}.crow .cchan{grid-area:chan}.crow .cfigs{grid-area:figs}.cal-cell{min-height:64px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div class="hbar">
+      <div class="eyebrow">Glow Up Rizz · Commerce Ops</div>
+      <div class="hmeta">
+        <span class="today">TODAY <b id="today"></b></span>
+        <span class="quotewrap"><span class="quote" id="quote"></span><button class="qedit" id="qedit" title="문구 수정" style="display:none">✎</button></span>
+        <div class="adminbox" id="adminbox">
+          <button class="adminbtn" id="adminbtn">관리자 로그인</button>
+          <div class="adminpop" id="adminpop">
+            <input id="pw" type="password" placeholder="비밀번호" autocomplete="off" />
+            <button class="lb" id="login">입장</button>
+            <div class="err" id="err"></div>
+            <div class="hint">데모: rizz2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hmain">
+      <div class="hleft">
+        <h1>PB 통합 일정 <span class="slash">/</span> <span id="tabname">전체</span></h1>
+        <div class="sub">
+          <span class="live"><span class="dot"></span> <b id="srcmode">DEMO</b></span>
+          <span>커머스 <b id="m-commerce">0</b>건</span>
+          <span>생산 <b id="m-prod">0</b>품목</span>
+          <span id="m-time"></span>
+        </div>
+      </div>
+    </div>
+  </header>
+  <nav class="nav">
+    <div class="navtabs" id="navtabs"></div>
+    <div class="navutil" id="navutil"></div>
+  </nav>
+  <main id="view"></main>
+  <footer>
+    <b>데이터 흐름</b> Monday GraphQL + Google Sheets(마스터 타임라인 직접 파싱) → Vercel serverless → 이 페이지<br>
+    빨강 세로줄 = 이번 주
+  </footer>
+</div>
+<div class="scrim" id="scrim"></div>
+<aside class="detail" id="detail"><button class="close" id="dclose">&times;</button><div id="dbody"></div></aside>
+
+<script>
+const DEMO_COMMERCE=[{brand:"[PB] 어퍼 볼캡",channel:"매일제히",date:"6월 1",revenue:5550000}];
+const DEMO_PRODUCTION = [
+  { brand:"YOGO", cat:"잡화", item:"용돈박스", sku:1, ph:[["sample",1,1],["deposit",2,2],["prod",3,4],["stock",5,5]] },
+  { brand:"YOGO", cat:"잡화", item:"사주 팔찌", sku:5, ph:[["sample",1,1],["deposit",2,2],["prod",3,4],["stock",5,5]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"볼캡 스타일(핑/청/블)", sku:3, ph:[["prod",1,4],["stock",5,5]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"시어서커 체크셔츠 (블루)", sku:1, ph:[["sample",1,1],["deposit",2,2],["prod",3,5],["stock",6,6]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"볼캡 스타일 핏 카키", sku:1, ph:[["sample",1,1],["deposit",2,2],["prod",3,5],["stock",6,6]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"보부상 가죽가방", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"피그먼트 호보백", sku:2, ph:[["sample",1,1],["deposit",2,2],["prod",3,6],["stock",7,7]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"카드지갑", sku:3, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"카드홀더", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"수영복", item:"뉴 모노키니(블랙/화이트/베이지)", sku:3, ph:[["sample",1,1],["deposit",2,2],["prod",3,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"수영복", item:"나시 비키니", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"수영복", item:"역삼각 비키니", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"수영복", item:"프릴 비키니", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"수영복", item:"4pc 커버업비키니세트", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"수영복", item:"비키니 커버업", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"의류", item:"아이스 골반 부츠컷 팬츠", sku:3, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"Bunivi", cat:"의류", item:"베이직 우먼 티셔츠", sku:4, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"스트라이프 체크셔츠 (크림/블루/핑크)", sku:3, ph:[["sample",1,2],["deposit",3,3],["prod",4,6],["stock",7,7]] },
+  { brand:"KoiKoi", cat:"리빙", item:"토일렛 퍼퓸 10ml", sku:3, ph:[["sample",1,1],["etc",2,2],["deposit",3,3],["etc",4,6],["prod",7,7],["stock",8,8]] },
+  { brand:"Noteau", cat:"헤어케어", item:"노워시 트리트먼트 팩 200ml", sku:1, ph:[["deposit",1,1],["prod",2,8],["stock",9,9]] },
+  { brand:"Noteau", cat:"헤어케어", item:"노워시 트리트먼트 기획세트", sku:1, ph:[["deposit",1,1],["prod",2,8],["stock",9,9]] },
+  { brand:"KoiKoi", cat:"리빙", item:"방향+탈취 디퓨저 300ml", sku:3, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["etc",5,7],["prod",8,8],["stock",9,9]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"데일리 백팩", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,8],["stock",9,9]] },
+  { brand:"SSSock", cat:"F&B", item:"쏙쉐이크 그레인 50g - 2차 리오더", sku:1, ph:[["deposit",1,1],["prod",2,8],["stock",9,9]] },
+  { brand:"Balansol", cat:"이너뷰티", item:"모닝 리셋 젤리 20g - 석류맛", sku:1, ph:[["sample",1,1],["deposit",2,2],["prod",3,9],["stock",10,10]] },
+  { brand:"MELV", cat:"색조", item:"컬러체인지 립밤", sku:1, ph:[["sample",1,1],["deposit",2,2],["prod",3,9],["stock",10,10]] },
+  { brand:"Bunivi", cat:"속옷", item:"데일리 브라 셋업 팬티", sku:1, ph:[["sample",1,4],["deposit",5,5],["prod",6,10],["stock",11,11]] },
+  { brand:"Bunivi", cat:"의류", item:"파자마", sku:1, ph:[["plan",1,1],["sample",2,5],["deposit",6,6],["prod",7,10],["stock",11,11]] },
+  { brand:"MELV", cat:"색조", item:"하이라이터", sku:3, ph:[["sample",1,2],["deposit",3,3],["prod",4,10],["stock",11,11]] },
+  { brand:"MELV", cat:"색조", item:"파운데이션", sku:1, ph:[["sample",1,2],["deposit",3,3],["prod",4,10],["stock",11,11]] },
+  { brand:"MELV", cat:"색조", item:"컨실러", sku:2, ph:[["sample",1,2],["deposit",3,3],["prod",4,10],["stock",11,11]] },
+  { brand:"SSSock", cat:"F&B", item:"쏙쉐이크 트러플 초코 50g - 신규", sku:1, ph:[["sample",1,1],["deposit",2,2],["prod",3,10],["stock",11,11]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"머플러", sku:1, ph:[["plan",1,1],["sample",2,5],["deposit",6,6],["prod",7,11],["stock",12,12]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"토트백", sku:1, ph:[["plan",1,1],["sample",2,5],["deposit",6,6],["prod",7,11],["stock",12,12]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"트래블백(에코백)", sku:1, ph:[["plan",1,1],["sample",2,5],["deposit",6,6],["prod",7,11],["stock",12,12]] },
+  { brand:"Bunivi", cat:"속옷", item:"데일리 브라", sku:1, ph:[["plan",1,1],["sample",2,5],["deposit",6,6],["prod",7,11],["stock",12,12]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"데일리 트레이닝 커플 셋업(상하의,티)", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"남녀공용 카고팬츠", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"UPPR HAUS", cat:"잡화", item:"남녀공용 커브 비니", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"UPPR HAUS", cat:"잡화", item:"남녀공용 겨울 장갑", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"UPPR HAUS", cat:"잡화", item:"남녀공용 스트라이프 머플러", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"UPPR HAUS", cat:"패션", item:"터치 장갑", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"머플러/목도리", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"토트백", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"After Lunch", cat:"패션잡화", item:"트래블백(에코백)", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"Bunivi", cat:"패션잡화", item:"데일리 브라", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"Bunivi", cat:"패션잡화", item:"데일리 브라 셋업 팬티", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"Bunivi", cat:"패션잡화", item:"파자마", sku:1, ph:[["plan",1,2],["sample",3,6],["deposit",7,7],["prod",8,11],["stock",12,12]] },
+  { brand:"KoiKoi", cat:"리빙", item:"홀리데이 오브제 캔들", sku:1, ph:[["plan",4,4],["sample",5,7],["prod",8,11],["stock",12,12]] },
+  { brand:"KoiKoi", cat:"리빙", item:"섬유 탈취제", sku:3, ph:[["sample",1,3],["etc",4,4],["deposit",5,5],["etc",6,8],["prod",9,11],["stock",12,12]] },
+  { brand:"KoiKoi", cat:"리빙", item:"퍼퓸 고체 탈취제", sku:3, ph:[["plan",1,1],["sample",2,4],["etc",5,5],["deposit",6,6],["etc",7,9],["prod",10,12],["stock",13,13]] },
+  { brand:"SSSock", cat:"F&B", item:"쏙쉐이크 딸기 요거트 50g - 신규", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"바디케어", item:"2층상 퍼퓸 데오미스트 75ml", sku:3, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"향", item:"퍼퓸", sku:3, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"바디케어", item:"소취 바디워시 300ml", sku:2, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"바디케어", item:"소취 바디스크럽버터", sku:2, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"헤어케어", item:"퍼퓸 노세범 헤어 미스트", sku:1, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"리빙", item:"핸드 버블트리트워시 300ml", sku:2, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"리빙", item:"핸드 세럼 40ml", sku:3, ph:[["sample",1,2],["etc",3,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"YOGO", cat:"기초케어", item:"올인원 클렌저 (페이스+바디)", sku:1, ph:[["plan",1,1],["sample",2,3],["etc",4,4],["deposit",5,5],["prod",6,12],["stock",13,13]] },
+  { brand:"YOGO", cat:"기초케어", item:"올인원 샴푸", sku:1, ph:[["plan",1,1],["sample",2,3],["etc",4,4],["deposit",5,5],["prod",6,12],["stock",13,13]] },
+  { brand:"YOGO", cat:"기초케어", item:"올인원 선세럼", sku:1, ph:[["plan",1,1],["sample",2,3],["etc",4,4],["deposit",5,5],["prod",6,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"선앰플(AHC)", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"톤업선크림", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"속눈썹영양제", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"마스카라", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"리무버", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"애교살펜슬", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"아이라이너", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"MELV", cat:"색조", item:"트임라이너", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Solv", cat:"스킨케어", item:"하이드로겔 팩", sku:1, ph:[["deposit",1,1],["prod",2,12],["stock",13,13]] },
+  { brand:"Solv", cat:"스킨케어", item:"선앰플", sku:1, ph:[["sample",1,3],["deposit",4,4],["prod",5,12],["stock",13,13]] },
+  { brand:"Noteau", cat:"의류", item:"커플 파자마", sku:3, ph:[["plan",1,1],["sample",2,4],["deposit",5,5],["prod",6,13],["stock",14,14]] },
+  { brand:"SSSock", cat:"F&B", item:"쏙클렌즈 48H (14개입)", sku:1, ph:[["sample",1,4],["deposit",5,5],["prod",6,13],["stock",14,14]] },
+  { brand:"SSSock", cat:"F&B", item:"쏙리커버리 4H", sku:1, ph:[["sample",1,4],["deposit",5,5],["prod",6,13],["stock",14,14]] },
+  { brand:"Solv", cat:"스킨케어", item:"릴릴 선크림", sku:1, ph:[["plan",1,1],["sample",2,4],["deposit",5,5],["prod",6,14],["stock",15,15]] },
+  { brand:"Solv", cat:"스킨케어", item:"채소코어 앰플", sku:1, ph:[["plan",1,1],["sample",2,4],["deposit",5,5],["prod",6,14],["stock",15,15]] },
+  { brand:"MELV", cat:"기초", item:"선파우더", sku:1, ph:[["plan",1,1],["sample",2,4],["etc",5,5],["deposit",6,6],["prod",7,14],["stock",15,15]] },
+  { brand:"MELV", cat:"색조", item:"립 프렙 마스크", sku:1, ph:[["plan",1,1],["sample",2,4],["etc",5,5],["deposit",6,6],["prod",7,14],["stock",15,15]] },
+  { brand:"MELV", cat:"색조", item:"아이브로우전용 탈색/블랙 염색약", sku:2, ph:[["plan",1,1],["sample",2,4],["etc",5,5],["deposit",6,6],["prod",7,14],["stock",15,15]] },
+  { brand:"Solv", cat:"스킨케어", item:"푸딩 앰플", sku:1, ph:[["plan",1,1],["sample",2,4],["deposit",5,5],["prod",6,15],["stock",16,16]] },
+  { brand:"Solv", cat:"스킨케어", item:"슬리핑 포어 멜팅 패치", sku:1, ph:[["plan",1,1],["sample",2,4],["deposit",5,5],["prod",6,15],["stock",16,16]] },
+  { brand:"Noteau", cat:"헤어케어", item:"두피 가글 샴푸(데일리)", sku:1, ph:[["sample",1,3],["etc",4,4],["deposit",5,5],["prod",6,15],["stock",16,16]] },
+  { brand:"Noteau", cat:"헤어케어", item:"두피 치약 스케일러", sku:1, ph:[["sample",1,3],["etc",4,4],["deposit",5,5],["prod",6,15],["stock",16,16]] },
+  { brand:"Noteau", cat:"헤어케어", item:"두피 앰플 (모발 영양제)", sku:1, ph:[["sample",1,3],["etc",4,4],["deposit",5,5],["prod",6,15],["stock",16,16]] },
+  { brand:"MELV", cat:"기초", item:"카페인으로 깨우는 10분 모닝 마스크", sku:1, ph:[["plan",1,1],["sample",2,4],["etc",5,5],["deposit",6,6],["prod",7,16],["stock",17,17]] },
+  { brand:"Noteau", cat:"헤어케어", item:"4 in 1 헤어 케어", sku:1, ph:[["plan",1,2],["sample",3,5],["etc",6,6],["deposit",7,7],["prod",8,17],["stock",18,18]] },
+];
+
+const PHASE={plan:{ko:"기획",s:"기획",c:"var(--ph-plan)"},sample:{ko:"샘플링",s:"샘플",c:"var(--ph-sample)"},deposit:{ko:"선금",s:"선금",c:"var(--ph-deposit)"},prod:{ko:"생산",s:"생산",c:"var(--ph-prod)"},stock:{ko:"입고예정",s:"입고",c:"var(--ph-stock)"},etc:{ko:"용기/CT",s:"용기",c:"var(--ph-etc)"}};
+const TEAMC={"AMD":{c:"var(--blu)",t:"#0a0a0a"},"MD":{c:"var(--red)",t:"#fff"},"디자인":{c:"var(--pur)",t:"#fff"},"생산":{c:"var(--ph-prod)",t:"#0a0a0a"}};
+const CHECK=[
+ {d:18,t:"상세페이지 기획",team:"AMD"},
+ {d:14,t:"상품안(+USP)·이미지자료",team:"MD"},
+ {d:14,t:"상세페이지 디자인",team:"디자인",dep:"AMD 기획 선행"},
+ {d:10,t:"최저가 점검",team:"MD"},
+ {d:7,t:"크리에이터 이미지→썸네일",team:"디자인"},
+ {d:7,t:"가격표 제작(상품안 기반)",team:"디자인"},
+ {d:5,t:"FAQ 작성",team:"MD"},
+ {d:3,t:"판매 세팅(링크검수·유튜브쇼핑)",team:"MD"},
+ {d:1,t:"업로드 콘텐츠 확인",team:"MD"},
+ {d:0,t:"모니터링 시작",team:"MD"},
+];
+const DEFAULT_QUOTE="오늘 하루도 단단하게 ✊"; // API 연결 실패 시 폴백 문구
+let currentQuote=DEFAULT_QUOTE;
+
+let commerce=DEMO_COMMERCE, production=DEMO_PRODUCTION, activeTab="전체", commerceViewMode="list";
+const TODAY=new Date(), START=new Date(2026,5,29);
+const TODAY_MID=new Date(TODAY.getFullYear(),TODAY.getMonth(),TODAY.getDate());
+const curSlot=Math.floor((TODAY-START)/(7*864e5))+1;
+const won=n=>Number(n||0).toLocaleString('ko-KR');
+const norm=s=>(s||'').replace(/\[PB\]|\s/g,'');
+function weekLabel(s){
+  const d=slotToDate(s);
+  const y=d.getFullYear(),mo=d.getMonth()+1;
+  // 해당 월의 1일이 속한 주를 1주차로 보고, slotToDate(s)가 몇 번째 주인지 계산
+  const firstOfMonth=new Date(y,mo-1,1);
+  const wk=Math.ceil((d.getDate()+firstOfMonth.getDay())/7)||1;
+  const yLabel=y===2026?'':((y-2000)+'년 ');
+  return yLabel+mo+'월 '+wk+'주';
+}
+function startSlot(p){return Math.min.apply(null,p.ph.map(x=>x[1]));}
+function stockSlot(p){let m=0;p.ph.forEach(([t,s,e])=>{if(t==='stock')m=Math.max(m,e);});if(!m)m=Math.max.apply(null,p.ph.map(x=>x[2]));return m;}
+function statusOf(p){const st=stockSlot(p);if(st<curSlot)return 'done';if(startSlot(p)<=curSlot)return 'now';return 'soon';}
+const STAT={now:{t:"진행중",c:"now"},soon:{t:"예정",c:"soon"},done:{t:"입고완료",c:"done"}};
+function matchPC(p,c){const item=norm(p.item),b=norm(c.brand);for(let i=0;i<item.length-1;i++){if(b.includes(item.substr(i,2)))return true;}return false;}
+function findSale(p){return commerce.find(c=>matchPC(p,c));}
+// 판매일정 텍스트의 시작일을 파싱. Monday 날짜 범위는 "2026-06-01 - 2026-06-10" 형식(ISO),
+// 수기로 입력된 경우 "6월 1 - 30" 같은 한글 형식일 수도 있어 둘 다 지원한다.
+function cdate(s){
+  s=(s||'').trim();
+  const iso=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3]);
+  const m=s.match(/(\d+)월\s*(\d+)/);
+  return m?new Date(2026,+m[1]-1,+m[2]):new Date(2100,0,1);
+}
+// 판매일정 텍스트에서 종료일을 파싱. ISO 범위("2026-06-01 - 2026-06-10")는 두 번째 날짜를,
+// "6월 23-7월 5" 같은 한글 범위는 두 번째(월,일)를, "6월 25-30"처럼 일자만 반복되면 같은 달의
+// 두 번째 일자를, 단일 날짜면 그 날짜를 종료일로 본다.
+function cdateEnd(s){
+  s=(s||'').trim();
+  const isos=[...s.matchAll(/(\d{4})-(\d{1,2})-(\d{1,2})/g)];
+  if(isos.length){const last=isos[isos.length-1];return new Date(+last[1],+last[2]-1,+last[3]);}
+  const ms=[...s.matchAll(/(\d+)월\s*(\d+)/g)];
+  if(ms.length>=2){const last=ms[ms.length-1];return new Date(2026,+last[1]-1,+last[2]);}
+  if(ms.length===1){
+    const m=ms[0],after=s.slice(m.index+m[0].length);
+    const range=after.match(/^\s*-\s*(\d+)/);
+    if(range)return new Date(2026,+m[1]-1,+range[1]);
+    return new Date(2026,+m[1]-1,+m[2]);
+  }
+  return new Date(2100,0,1);
+}
+function slotToDate(s){return new Date(START.getTime()+(s-1)*7*864e5);}
+function daysLeft(d){return Math.round((d-TODAY)/864e5);}
+function fmtD(d){return (d.getMonth()+1)+"/"+d.getDate();}
+function ddLabel(dl){return dl<0?(-dl)+"일 지남":dl===0?"오늘":"D-"+dl;}
+function ddCls(dl){return dl<0?"over":dl<=3?"soon":"ok";}
+// 자금 일정 전용: 지난 건은 "N일 지남" 대신 날짜만, D-day 당일은 강조
+function moneyLabel(dl){return dl<0?"지남":dl===0?"D-DAY":"D-"+dl;}
+function moneyCls(dl){return dl<0?"past":dl===0?"dday":dl<=3?"soon":"ok";}
+function anchorDate(p){const s=findSale(p);return s?cdate(s.date):slotToDate(stockSlot(p));}
+
+/* 간트 — 오늘이 속한 주(curSlot)가 항상 캘린더의 맨 왼쪽 첫 칸이 되도록 슬라이딩 */
+const GANTT_WEEKS=24; // 화면에 보이는 주 수
+function dispSlot(realSlot){return realSlot-curSlot+1;} // curSlot -> 1
+function ganttHead(){
+  // 표시되는 24주 각각의 실제 날짜를 구해 월별로 그룹핑
+  const weekDates=[];for(let d=1;d<=GANTT_WEEKS;d++)weekDates.push(slotToDate(curSlot+d-1));
+  const monthGroups=[];
+  weekDates.forEach((dt,idx)=>{
+    const y=dt.getFullYear(),mo=dt.getMonth();
+    const last=monthGroups[monthGroups.length-1];
+    if(last&&last.y===y&&last.mo===mo)last.span++;
+    else monthGroups.push({y,mo,span:1});
+  });
+  let mh=monthGroups.map((g,i)=>{const label=(g.y===2026?'':((g.y-2000)+'년 '))+(g.mo+1)+'월';return '<div class="month'+(i%2===1?' q':'')+'" style="grid-column:span '+g.span+'">'+label+'</div>';}).join('');
+  let wk='';
+  weekDates.forEach((dt,idx)=>{
+    const s=curSlot+idx;
+    const firstOfMonth=new Date(dt.getFullYear(),dt.getMonth(),1);
+    const w=Math.ceil((dt.getDate()+firstOfMonth.getDay())/7)||1;
+    wk+='<div class="week'+(idx===0?' nowcol':'')+'">'+w+'주</div>';
+  });
+  return '<div class="grid-head"><div class="gh-label">BRAND / 품목 / SKU</div><div><div class="months" style="grid-template-columns:repeat('+GANTT_WEEKS+',1fr)">'+mh+'</div><div class="weeks" style="grid-template-columns:repeat('+GANTT_WEEKS+',1fr)">'+wk+'</div></div></div>';
+}
+function rowHTML(p,idx){
+  let cells='';for(let i=1;i<=GANTT_WEEKS;i++)cells+='<div class="cell'+(i===1?' nowcol':'')+'"></div>';
+  let bars='';
+  p.ph.forEach(([t,s,e])=>{
+    const ds=dispSlot(s),de=dispSlot(e);
+    if(de<1||ds>GANTT_WEEKS)return; // 화면 밖이면 그리지 않음
+    const cs=Math.max(ds,1),ce=Math.min(de,GANTT_WEEKS);
+    bars+='<div class="bar '+t+'" style="grid-column:'+cs+' / '+(ce+1)+'">'+PHASE[t].s+'</div>';
+  });
+  const st=statusOf(p),sale=findSale(p);
+  return '<div class="grow" data-i="'+idx+'" style="--gw:'+GANTT_WEEKS+'"><div class="glabel"><div class="gb"><span class="gbrand">'+p.brand+'</span><span class="gcat">'+p.cat+'</span><span class="gstatus '+STAT[st].c+'">'+STAT[st].t+'</span></div><span class="gitem" title="'+p.item+'">'+p.item+'</span><span class="gsku">SKU '+p.sku+(sale?' · <span class="glink">판매연동</span>':'')+'</span></div><div class="track" style="grid-template-columns:repeat('+GANTT_WEEKS+',1fr)">'+cells+'<div class="bars" style="grid-template-columns:repeat('+GANTT_WEEKS+',1fr)">'+bars+'</div></div></div>';
+}
+function ganttBlock(list){
+  const active=list.filter(x=>statusOf(x.p)!=='done'),done=list.filter(x=>statusOf(x.p)==='done');
+  active.sort((a,b)=>(statusOf(a.p)==='now'?0:1)-(statusOf(b.p)==='now'?0:1)||startSlot(a.p)-startSlot(b.p));
+  let html='<div class="gantt"><div class="gantt-inner">'+ganttHead()+active.map(x=>rowHTML(x.p,x.i)).join('');
+  if(done.length)html+='<button class="toggle" data-toggle="done-group"><span><span class="arw">▸</span> 입고 완료 '+done.length+'건</span><span>펼치기</span></button><div class="collapsed" id="done-group">'+done.map(x=>rowHTML(x.p,x.i)).join('')+'</div>';
+  return html+'</div></div>';
+}
+function cardsHTML(list){return '<div class="cards">'+list.map(c=>'<div class="card"><div class="brand">'+c.brand+'</div><div class="chan">'+c.channel+'</div><div class="row"><span class="date">'+c.date+'</span><div class="figs"><div class="fig"><b>'+won(c.deal)+'</b><span>거래액</span></div><div class="fig"><b>'+won(c.actual)+'</b><span>실매출</span></div></div></div></div>').join('')+'</div>';}
+function isClosed(c){return cdateEnd(c.date)<TODAY_MID;}
+
+/* 채널/크리에이터명 기준 해시 → 12색 팔레트에서 일관된 색 배정 */
+const CH_COLORS=['var(--ch-0)','var(--ch-1)','var(--ch-2)','var(--ch-3)','var(--ch-4)','var(--ch-5)','var(--ch-6)','var(--ch-7)','var(--ch-8)','var(--ch-9)','var(--ch-10)','var(--ch-11)'];
+function chanColor(name){
+  const s=(name||'').trim()||'미지정';
+  let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;
+  return CH_COLORS[h%CH_COLORS.length];
+}
+
+/* 목록 뷰: 날짜순 한 줄 리스트 */
+function listHTML(list){
+  if(!list.length)return '<div class="empty">진행 중인 커머스 판매 일정 없음</div>';
+  const rows=list.slice().sort((a,b)=>cdate(a.date)-cdate(b.date)).map(c=>{
+    const col=chanColor(c.channel);
+    return '<div class="crow"><span class="cdot" style="background:'+col+'"></span><span class="cbrand" title="'+c.brand+'">'+c.brand+'</span><span class="cchan">'+(c.channel||'-')+'</span><span class="cdate">'+c.date+'</span><span class="cfigs"><span><b>'+won(c.deal)+'</b><span>거래액</span></span><span><b>'+won(c.actual)+'</b><span>실매출</span></span></span></div>';
+  }).join('');
+  return '<div class="clist">'+rows+'</div>';
+}
+
+/* 캘린더 뷰: 월간 그리드, 채널/크리에이터별 색상으로 겹침 직관 확인 */
+let calCursor=null; // {y, m} - null이면 오늘이 속한 달로 초기화
+function calendarHTML(list, brand){
+  if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};
+  const {y,m}=calCursor;
+  const first=new Date(y,m,1);
+  const startDow=first.getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const prevDays=new Date(y,m,0).getDate();
+  const cells=[];
+  for(let i=0;i<startDow;i++)cells.push({d:prevDays-startDow+1+i,out:true,y:m===0?y-1:y,m:m===0?11:m-1});
+  for(let d=1;d<=daysInMonth;d++)cells.push({d,out:false,y,m});
+  while(cells.length%7!==0||cells.length<35)cells.push({d:cells.length-startDow-daysInMonth+1,out:true,y:m===11?y+1:y,m:m===11?0:m+1});
+  const byDay={};
+  const rangeStart=new Date(y,m,1),rangeEnd=new Date(y,m+1,0);
+  list.forEach(c=>{
+    const s=cdate(c.date),e=cdateEnd(c.date);
+    if(isNaN(s)||isNaN(e))return;
+    if(e<rangeStart||s>rangeEnd)return; // 이 달과 전혀 겹치지 않으면 스킵
+    let cur=new Date(Math.max(s,rangeStart));
+    const stop=new Date(Math.min(e,rangeEnd));
+    while(cur<=stop){
+      (byDay[cur.getDate()]=byDay[cur.getDate()]||[]).push(c);
+      cur=new Date(cur.getFullYear(),cur.getMonth(),cur.getDate()+1);
+    }
+  });
+  const dow=['일','월','화','수','목','금','토'];
+  const dowHTML=dow.map(d=>'<span>'+d+'</span>').join('');
+  const gridHTML=cells.map(c=>{
+    const isToday=!c.out&&c.y===TODAY.getFullYear()&&c.m===TODAY.getMonth()&&c.d===TODAY.getDate();
+    const evts=c.out?[]:(byDay[c.d]||[]);
+    const shown=evts.slice(0,3);
+    const evtHTML=shown.map(c2=>'<div class="cal-evt" style="background:'+chanColor(c2.channel)+'22;color:'+chanColor(c2.channel)+'" title="'+c2.brand+' · '+(c2.channel||'')+'">'+c2.brand+'</div>').join('');
+    const moreHTML=evts.length>3?'<div class="cal-more">+'+(evts.length-3)+'건</div>':'';
+    return '<div class="cal-cell'+(c.out?' out':'')+(isToday?' today':'')+'"><div class="cdnum">'+c.d+'</div>'+evtHTML+moreHTML+'</div>';
+  }).join('');
+  const chans=[...new Set(list.map(c=>c.channel).filter(Boolean))].slice(0,12);
+  const legendHTML=chans.map(ch=>'<span><i style="background:'+chanColor(ch)+'"></i>'+ch+'</span>').join('');
+  const navAttr=brand?(' data-brand="'+brand+'"'):'';
+  return '<div class="calhead"><div class="calnav"'+navAttr+'><button class="cal-prev">‹</button><span class="calmonth">'+(m+1)+'월 '+y+'</span><button class="cal-next">›</button></div></div>'+
+    '<div class="cal"><div class="cal-dow">'+dowHTML+'</div><div class="cal-grid">'+gridHTML+'</div></div>'+
+    (chans.length?'<div class="cal-legend">'+legendHTML+'</div>':'');
+}
+
+function commerceCardsToggle(list, brand){
+  const open=list.filter(c=>!isClosed(c));
+  const mode=commerceViewMode;
+  const body=!open.length?'<div class="empty">진행 중인 커머스 판매 일정 없음</div>':(mode==='cal'?calendarHTML(open,brand):listHTML(open));
+  return '<div class="viewtoggle"><button class="vt-btn'+(mode==='list'?' on':'')+'" data-vt="list">목록</button><button class="vt-btn'+(mode==='cal'?' on':'')+'" data-vt="cal">캘린더</button></div>'+body;
+}
+
+/* 뷰: 브랜드 / 전체 */
+function viewAll(brand){
+  const list=production.map((p,i)=>({p,i})).filter(x=>!brand||x.p.brand===brand);
+  let comm=brand?commerce.filter(c=>list.some(x=>matchPC(x.p,c))):commerce.slice().sort((a,b)=>cdate(a.date)-cdate(b.date));
+  return '<section class="sec"><div class="sec-head"><span class="sec-num">01</span><span class="sec-title">PB 커머스 판매 일정</span><span class="sec-src">'+(brand||'가까운 순')+' · Monday</span></div>'+commerceCardsToggle(comm,brand)+'</section>'+
+    '<section class="sec"><div class="sec-head"><span class="sec-num">02</span><span class="sec-title">PB 샘플링 · 생산 타임라인</span><span class="sec-src">'+list.length+'품목 · Sheet</span></div>'+
+    '<div class="legend"><span><i style="background:var(--ph-plan)"></i>기획</span><span><i style="background:var(--ph-sample)"></i>샘플링</span><span><i style="background:var(--ph-deposit)"></i>선금</span><span><i style="background:var(--ph-prod)"></i>생산</span><span><i style="background:var(--ph-stock)"></i>입고예정</span><span><i style="background:var(--ph-etc)"></i>용기/CT</span></div>'+
+    (list.length?ganttBlock(list):'<div class="empty">해당 브랜드 품목 없음</div>')+'</section>';
+}
+function viewArrivals(){
+  const rows=production.map((p,i)=>({p,i})).filter(x=>stockSlot(x.p)>=curSlot).sort((a,b)=>stockSlot(a.p)-stockSlot(b.p));
+  if(!rows.length)return '<section class="sec"><div class="empty">예정된 입고 없음</div></section>';
+  const body=rows.map(x=>{const ss=stockSlot(x.p),dl=daysLeft(slotToDate(ss));return '<div class="task" data-i="'+x.i+'"><div class="tl"><div class="tb">'+x.p.brand+' · '+x.p.cat+'</div><div class="ti">'+x.p.item+'</div></div><div class="tt"><span class="badge" style="background:var(--ph-stock);color:#fff">입고</span><span class="t2">'+weekLabel(ss)+'</span></div><div class="tr"><span class="td '+ddCls(dl)+'">'+ddLabel(dl)+'</span><span class="tw">'+fmtD(slotToDate(ss))+'</span></div></div>';}).join('');
+  return '<section class="sec"><div class="sec-head"><span class="sec-num">★</span><span class="sec-title">입고 임박</span><span class="sec-src">가까운 순 · '+rows.length+'건</span></div><div class="tasklist">'+body+'</div></section>';
+}
+function viewMoney(){
+  const evs=[];production.forEach((p,i)=>p.ph.forEach(([t,s,e,amount])=>{if(t==='deposit')evs.push({i,p,slot:s,due:slotToDate(s),amount:amount||0});}));
+  if(!evs.length)return '<section class="sec"><div class="empty">선금 일정 없음</div></section>';
+  const upcoming=evs.filter(e=>daysLeft(e.due)>=0).sort((a,b)=>a.slot-b.slot);
+  const past=evs.filter(e=>daysLeft(e.due)<0).sort((a,b)=>b.slot-a.slot);
+  const hasAmount=evs.some(e=>e.amount>0);
+  const totUpcoming=upcoming.reduce((a,e)=>a+e.amount,0);
+  const row=(e,isPast)=>{
+    const dl=daysLeft(e.due);
+    const amtTag=e.amount>0?' · <span style="color:var(--ink);font-weight:700">'+won(e.amount)+'원</span>':'';
+    return '<div class="task'+(isPast?' muted':'')+'" data-i="'+e.i+'"><div class="tl"><div class="tb">'+e.p.brand+' · '+e.p.cat+'</div><div class="ti">'+e.p.item+'</div></div><div class="tt"><span class="badge" style="background:var(--red);color:#fff">선금</span><span class="t2">'+weekLabel(e.slot)+amtTag+'</span></div><div class="tr"><span class="td '+moneyCls(dl)+'">'+moneyLabel(dl)+'</span><span class="tw">'+fmtD(e.due)+'</span></div></div>';
+  };
+  let body=upcoming.map(e=>row(e,false)).join('');
+  if(past.length)body+='<div class="pastdiv">지난 선금 '+past.length+'건</div>'+past.map(e=>row(e,true)).join('');
+  const totBar=hasAmount?'<div class="totbar"><div><div class="ti2">예정 선금 건수</div><div class="tv">'+upcoming.length+'건</div></div><div><div class="ti2">예정 선금 합계</div><div class="tv">'+won(totUpcoming)+'원</div></div></div>':'';
+  const note=hasAmount?'<div class="note">금액은 \'PB 자금 계획\' 시트의 선금/잔금 50 컬럼과 자동 연동</div>':'<div class="note">금액은 \'PB 자금 계획\' 시트에 품목별 선금액이 입력되면 자동 표시</div>';
+  return '<section class="sec"><div class="sec-head"><span class="sec-num">★</span><span class="sec-title">자금 일정 (선금 지출)</span><span class="sec-src">시점 순 · '+upcoming.length+'건 예정</span></div>'+totBar+'<div class="tasklist">'+body+'</div>'+note+'</section>';
+}
+function monthKey(c){const d=cdate(c.date);return d.getFullYear()*12+d.getMonth();}
+function monthName(c){const d=cdate(c.date);return d.getFullYear()===2026?(d.getMonth()+1)+'월':(d.getFullYear()-2000)+'년 '+(d.getMonth()+1)+'월';}
+function viewSales(){
+  if(!commerce.length)return '<section class="sec"><div class="empty">매출 일정 없음</div></section>';
+  const curKey=TODAY.getFullYear()*12+TODAY.getMonth();
+  const groups={};
+  commerce.forEach(c=>{const k=monthKey(c);(groups[k]=groups[k]||{key:k,label:monthName(c),items:[]}).items.push(c);});
+  const sorted=Object.values(groups).sort((a,b)=>a.key-b.key);
+  const curGroup=groups[curKey];
+  const curDeal=curGroup?curGroup.items.reduce((a,c)=>a+Number(c.deal||0),0):0;
+  const curActual=curGroup?curGroup.items.reduce((a,c)=>a+Number(c.actual||0),0):0;
+  let body='';
+  sorted.forEach(g=>{
+    g.items.sort((a,b)=>cdate(a.date)-cdate(b.date));
+    const gid='salesmonth-'+g.key;
+    if(g.key===curKey){
+      body+='<div class="sec-head" style="margin:22px 0 10px"><span class="sec-title" style="font-size:15px">'+g.label+' · 이번 달</span><span class="sec-src">'+g.items.length+'건</span></div>'+cardsHTML(g.items);
+    }else{
+      const tag=g.key<curKey?'지난 달':'다음 달';
+      body+='<button class="toggle" data-toggle="'+gid+'"><span><span class="arw">▸</span> '+g.label+' · '+g.items.length+'건 ('+tag+')</span><span>펼치기</span></button><div class="collapsed" id="'+gid+'">'+cardsHTML(g.items)+'</div>';
+    }
+  });
+  const curLabel=curGroup?curGroup.label:monthName({date:TODAY.getFullYear()+'-'+(TODAY.getMonth()+1)+'-1'});
+  return '<section class="sec"><div class="sec-head"><span class="sec-num">★</span><span class="sec-title">매출 현황</span><span class="sec-src">'+curLabel+' · Monday</span></div><div class="totbar"><div><div class="ti2">'+curLabel+' PB 판매 건수</div><div class="tv">'+(curGroup?curGroup.items.length:0)+'건</div></div><div><div class="ti2">거래액 합계</div><div class="tv">'+won(curDeal)+'원</div></div><div><div class="ti2">실매출 합계</div><div class="tv">'+won(curActual)+'원</div></div></div>'+body+'<div class="note">거래액·실매출은 Monday \'거래액\'·\'실매출\' 컬럼과 자동 연동 · 이번 달만 기본으로 펼쳐짐</div></section>';
+}
+
+/* 렌더 */
+function brands(){return [...new Set(production.map(p=>p.brand))];}
+const UTIL=["입고 임박","자금","매출"];
+function renderNav(){
+  document.getElementById('navtabs').innerHTML=['전체',...brands()].map(v=>'<button class="tab'+(activeTab===v?' on':'')+'" data-tab="'+v+'">'+v+'</button>').join('');
+  document.getElementById('navutil').innerHTML=UTIL.map(v=>'<button class="tab util'+(activeTab===v?' on':'')+'" data-tab="'+v+'">'+v+'</button>').join('');
+  document.querySelectorAll('.nav .tab').forEach(t=>t.onclick=()=>{activeTab=t.dataset.tab;calCursor=null;render();});
+}
+function renderView(){
+  let v;
+  if(activeTab==='입고 임박')v=viewArrivals();
+  else if(activeTab==='자금')v=viewMoney();
+  else if(activeTab==='매출')v=viewSales();
+  else v=viewAll(activeTab==='전체'?null:activeTab);
+  document.getElementById('view').innerHTML=v;
+  document.getElementById('tabname').textContent=activeTab;
+  document.querySelectorAll('.grow,.task').forEach(g=>g.onclick=()=>openDetail(+g.dataset.i));
+  document.querySelectorAll('.toggle').forEach(b=>b.onclick=()=>{const g=document.getElementById(b.dataset.toggle);const open=g.classList.toggle('collapsed')===false;b.classList.toggle('open',open);b.querySelector('span:last-child').textContent=open?'접기':'펼치기';});
+  document.querySelectorAll('.vt-btn').forEach(b=>b.onclick=()=>{commerceViewMode=b.dataset.vt;calCursor=null;renderView();});
+  document.querySelectorAll('.cal-prev').forEach(b=>b.onclick=()=>{if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};calCursor.m--;if(calCursor.m<0){calCursor.m=11;calCursor.y--;}renderView();});
+  document.querySelectorAll('.cal-next').forEach(b=>b.onclick=()=>{if(!calCursor)calCursor={y:TODAY.getFullYear(),m:TODAY.getMonth()};calCursor.m++;if(calCursor.m>11){calCursor.m=0;calCursor.y++;}renderView();});
+}
+function render(){renderNav();renderView();}
+
+function openDetail(i){
+  const p=production[i],sale=findSale(p),st=statusOf(p),A=anchorDate(p);
+  const phases=p.ph.map(([t,s,e])=>{const cur=(s<=curSlot&&curSlot<=e);return '<div class="phase'+(cur?' cur':'')+'"><span class="pdot" style="background:'+PHASE[t].c+'"></span><span class="pname">'+PHASE[t].ko+(cur?' ← 지금':'')+'</span><span class="pwhen">'+weekLabel(s)+(e>s?' → '+weekLabel(e):'')+'</span></div>';}).join('');
+  const ckl=CHECK.map(c=>{const due=new Date(A.getTime()-c.d*864e5),dl=daysLeft(due),cls=dl<0?'done':dl<=3?'now':'soon',mark=dl<0?'✓':dl<=3?'!':'',tc=TEAMC[c.team];
+    return '<div class="ck"><span class="cs '+cls+'">'+mark+'</span><span class="cn">'+c.t+(c.dep?'<small>↳ '+c.dep+'</small>':'')+'</span><span class="ct" style="border-color:'+tc.c+';color:'+tc.c+'">'+c.team+'</span><span class="cw">'+fmtD(due)+' '+ddLabel(dl)+'</span></div>';}).join('');
+  const saleBlock=sale?'<div class="sale"><div class="sb">'+sale.brand+'</div><div class="sm">'+sale.channel+'</div><div class="sr"><span>'+sale.date+'</span><span class="v">목표 '+won(sale.revenue)+'</span></div></div>':'<div class="nolink">연동된 커머스 판매 일정 없음 (앵커=입고일 기준)</div>';
+  document.getElementById('dbody').innerHTML='<div class="d-brand">'+p.brand+'</div><div class="d-item">'+p.item+'</div><div class="d-meta">'+p.cat+' · SKU '+p.sku+' · <b style="color:'+(st==='now'?'#7fd49b':st==='done'?'#e0a25b':'var(--mut)')+'">'+STAT[st].t+'</b></div><div class="d-h">생산 개발 일정</div>'+phases+'<div class="d-h">런칭 체크리스트 (AMD·MD·디자인)</div>'+ckl+'<div class="d-h">커머스 판매</div>'+saleBlock;
+  document.getElementById('scrim').classList.add('open');document.getElementById('detail').classList.add('open');
+}
+function closeDetail(){document.getElementById('scrim').classList.remove('open');document.getElementById('detail').classList.remove('open');}
+document.getElementById('dclose').onclick=closeDetail;document.getElementById('scrim').onclick=closeDetail;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();});
+
+document.getElementById('today').textContent=TODAY.toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'short'});
+
+function renderQuote(){document.getElementById('quote').textContent='“'+currentQuote+'”';}
+renderQuote();
+async function loadQuote(){
+  try{const r=await fetch('/api/quote');if(r.ok){const j=await r.json();if(j&&j.quote){currentQuote=j.quote;renderQuote();}}}catch(e){}
+}
+loadQuote();
+
+function meta(live){document.getElementById('srcmode').textContent=live?'LIVE':'DEMO';document.getElementById('m-commerce').textContent=commerce.length;document.getElementById('m-prod').textContent=production.length;document.getElementById('m-time').innerHTML='업데이트 <b>'+new Date().toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</b>';}
+async function load(){
+  let live=false;
+  try{const [c,p]=await Promise.all([fetch('/api/monday-pb').then(r=>r.ok?r.json():null),fetch('/api/sheet-pb').then(r=>r.ok?r.json():null)]);
+    if(Array.isArray(c)&&c.length){commerce=c;live=true;}if(Array.isArray(p)&&p.length){production=p;live=true;}}catch(e){}
+  meta(live);render();
+}
+load();setInterval(load,15*60*1000);
+
+// 관리자 (우상단 코너 팝오버)
+let isAdmin=false, adminPw='';
+const adminbox=document.getElementById('adminbox'),adminbtn=document.getElementById('adminbtn'),adminpop=document.getElementById('adminpop'),quotewrap=document.querySelector('.quotewrap');
+adminbtn.onclick=e=>{e.stopPropagation();if(isAdmin){isAdmin=false;adminPw='';adminbtn.textContent='관리자 로그인';adminbtn.classList.remove('in');bindQedit();return;}adminpop.classList.toggle('open');document.getElementById('pw').focus();};
+function doLogin(){
+  const pw=document.getElementById('pw').value;
+  if(pw==='rizz2026'){isAdmin=true;adminPw=pw;adminpop.classList.remove('open');adminbtn.textContent='관리자 · 로그아웃';adminbtn.classList.add('in');document.getElementById('pw').value='';document.getElementById('err').textContent='';bindQedit();}
+  else{document.getElementById('err').textContent='비밀번호 오류';}
+}
+document.getElementById('login').onclick=doLogin;
+document.getElementById('pw').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.addEventListener('click',e=>{if(!adminbox.contains(e.target))adminpop.classList.remove('open');});
+
+// 문구 편집 (관리자만, 저장 시 'PB 자금 계획' 시트 셀에 기록 → 모두에게 동일하게 노출)
+function bindQedit(){
+  const btn=document.getElementById('qedit');
+  if(!btn)return;
+  btn.style.display=isAdmin?'inline-flex':'none';
+  btn.onclick=()=>{
+    if(!isAdmin)return;
+    quotewrap.innerHTML='<input class="quote-input" id="qinput" maxlength="80" value="'+currentQuote.replace(/"/g,'&quot;')+'" /><button class="qsave" id="qsave">저장</button><span class="qmsg" id="qmsg"></span>';
+    const qinput=document.getElementById('qinput');qinput.focus();qinput.select();
+    const doSave=async()=>{
+      const val=qinput.value.trim();
+      if(!val)return;
+      document.getElementById('qmsg').textContent='저장 중…';
+      try{
+        const r=await fetch('/api/quote',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pw:adminPw,quote:val})});
+        const j=await r.json();
+        if(r.ok){currentQuote=j.quote;restoreQuoteUI();}
+        else{document.getElementById('qmsg').textContent=j.error||'저장 실패';}
+      }catch(e){document.getElementById('qmsg').textContent='저장 실패(네트워크)';}
+    };
+    document.getElementById('qsave').onclick=doSave;
+    qinput.addEventListener('keydown',e=>{if(e.key==='Enter')doSave();if(e.key==='Escape')restoreQuoteUI();});
+  };
+}
+function restoreQuoteUI(){
+  quotewrap.innerHTML='<span class="quote" id="quote"></span><button class="qedit" id="qedit" title="문구 수정">✎</button>';
+  renderQuote();
+  bindQedit();
+}
+bindQedit();
+
+</script>
+</body>
+</html>
